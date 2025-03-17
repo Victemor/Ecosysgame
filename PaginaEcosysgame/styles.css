@@ -1,0 +1,480 @@
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    
+}
+    
+
+
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.contenedor {
+    padding: 60px 0;
+    width: 90%;
+    max-width: 1000px;
+    margin: auto;
+    overflow: hidden;
+}
+
+.titulo {
+    color:rgb(7, 121, 45);
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+header {
+    width: 100%;
+    height: 600px;
+    background: linear-gradient(to right, hsla(201, 76%, 47%, 0.349), hsla(189, 87%, 97%, 0.459)), url(rio2.png);
+    background-size: cover;
+    background-attachment: fixed;
+    position: relative;
+    
+}
+
+nav {
+    text-align: right;
+    padding: 30px 50px 0 0;
+}
+
+nav > a {
+    color: rgb(2, 3, 46);
+    font-weight: 300;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+nav > a:hover {
+    text-decoration: underline;
+}
+
+header .texto {
+    display: flex;
+    flex-direction: column;
+    height: 430px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+header .texto h1 {
+    font-size: 50px;
+    margin-bottom: 10px;
+    color: rgb(3, 25, 150);
+}
+
+header .texto h2 {
+    font-size: 30px;
+    color:  rgb(12, 55, 245);
+    margin-top: 0;
+}
+
+.wave {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Sección sobre nosotros */
+.sobre-nosotros {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    background: #ffffff;
+}
+.contenedor-sobre-nosotros{
+    background: #ffffff;
+}
+
+
+.imagen-about-us {
+    max-width: 30%;
+}
+
+.contenedor-textos {
+    max-width: 48%;
+    padding: 0 0 30px 15px;
+    font-weight: 300px;
+}
+
+.contenedor-textos h3 {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: rgb(7, 121, 45);
+}
+
+.contenedor-textos p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+    text-align: justify;
+}
+
+.numero-circulo {
+    display: inline-block;
+    background-color: rgba(28, 167, 74, 0.884);
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    margin-right: 10px;
+}
+
+/* Estilos de la galería */
+.portafolio {
+    background: #ffffff;
+    padding: 60px 0;
+}
+.portafolio p{
+    font-size: 1rem;
+    margin-bottom: 20px;
+    text-align: justify;
+}
+
+.galeria-port {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.imagen-port {
+    width: 24%;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.imagen-port img {
+    width: 100%;
+    display: block;
+}
+
+.hover-galeria {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2; /* Asegúrate de que el logo esté encima de la imagen principal */
+}
+
+.hover-galeria img {
+    width: 50px;
+    height: 50px;
+}
+
+.hover-galeria p {
+    color: white;
+    font-size: 18px;
+    margin-left: 10px;
+}
+
+/* Mostrar superposición solo al pasar el ratón */
+.imagen-port:hover .hover-galeria {
+    opacity: 1;
+}
+
+/* Mostrar zoom en la imagen principal sin afectar la superposición */
+.imagen-port:hover .main-image {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+    z-index: 1; /* Asegura que la imagen principal quede debajo de la superposición */
+    position: relative;
+}
+
+/* Ajusta la opacidad de la imagen principal en el hover sin afectar el logo */
+.imagen-port:hover img.main-image {
+    opacity: 0.85; /* Ajusta el valor según tus preferencias */
+}
+
+/* Estilos del modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 3; /* Más alto que la galería */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 80%;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    color: white;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Botones para la navegación en el modal */
+.prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    margin-top: -22px;
+    color: white;
+    font-weight: bold;
+    font-size: 35px;
+    transition: 0.3s;
+    padding: 16px;
+}
+
+.prev {
+    left: 0;
+}
+
+.next {
+    right: 0;
+}
+.hover-galeria img {
+    width: 20px;  /* Ajusta el ancho del logo */
+    height: 20px;  /* Ajusta la altura del logo */
+}
+/*Animales*/
+/* Estilo base para las tarjetas */
+/* Contenedor de las tarjetas */
+.cards {
+    display: flex; /* Flexbox para alinear horizontalmente */
+    justify-content: center; /* Distribuye el espacio entre las tarjetas */
+    flex-wrap: wrap; /* Permite que las tarjetas se envuelvan si es necesario */
+    gap: 20px; /* Espacio entre las tarjetas */
+}
+
+/* Estilos para las tarjetas */
+.card {
+    width: calc(20% - 20px); /* Ajusta el ancho de cada tarjeta para que quepan 5 en una fila */
+    background-color: rgba(145, 241, 213, 0.884); /* Fondo azul claro */
+    border-radius: 10px;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05); /* Efecto zoom al pasar el ratón */
+}
+
+/* Ajusta las imágenes para que tengan el mismo tamaño */
+.card img {
+    width: 100%;
+    height: 200px; /* Controla la altura de la imagen */
+    object-fit: cover; /* Asegura que la imagen se ajuste sin distorsión */
+}
+
+/* Estilos para el texto dentro de las tarjetas */
+.texto-card-imagen {
+    padding: 20px;
+}
+.texto-card-imagen h3{
+    color: rgb(7, 121, 45);
+    font-size: 20px;
+    text-align: c enter;
+    margin-bottom: 30px;
+
+}
+.texto-card-imagen h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #06023a;
+    
+}
+
+.texto-card-imagen p {
+    font-size: 15px;
+    color: #040800;
+}
+.cards.card>.texto-card-imagen p{
+    font-weight: 300px;
+    padding-top: 5px;
+}
+/*servicios*/
+.nuestro-servicio{
+    background: #ffffff;
+    padding-bottom: 30px;
+}
+.servicio-cont{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.servicio-ind{
+    width: 28%;
+    text-align: center;
+}
+.servicio-ind img{
+    width: 90%;
+}
+.servicio-ind h3{
+    margin: 10px 0;
+    color: rgb(7, 121, 45);
+
+}
+.servicio-ind p{
+    margin: 15px 0;
+    font-weight: 300%;
+    text-align: center;
+    text-wrap: wrap;
+}
+.servicio-inds{
+    text-align: center;
+    margin: 20px 0;
+    font-weight: 300px;
+}
+.servicio-inds p{
+    max-width: 800px;  /* Ajusta este valor según lo que necesites */
+    margin: 0 auto;    /* Centra el texto horizontalmente */
+    line-height: 1.6;  /* Ajusta el espaciado entre líneas */
+}
+.servicio-inds h3{
+    color: rgb(7, 121, 45);
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 60px;
+
+}
+/*footer*/
+/* Footer */
+footer {
+    background: #414141;
+    padding: 60px 0 30px 0;
+    margin: auto;
+    overflow: hidden;
+    color: #f2f2f2;
+}
+
+.content-foo {
+    display: flex;
+    justify-content: space-between; /* Distribuye los items adecuadamente */
+    width: 90%;
+    margin: auto;
+    padding-bottom: 50px;
+}
+
+/* Bloques de información */
+.foo-item {
+    text-align: left;
+    flex-basis: 22%; /* Cada bloque ocupará aproximadamente un 22% del ancho total */
+    border-bottom: 1px solid#ccc;
+}
+
+/* Título más pequeño y con separación */
+.foo-item h4 {
+    margin-bottom: 5px; /* Espacio entre el título y el contenido */
+    color: #1909f1;
+    font-size: 20px; /* Tamaño más pequeño del título */
+    text-align: justify;
+   
+}
+
+/* Texto más pequeño y con más separación */
+.foo-item p {
+    margin-top: 0;
+    margin-bottom: 20px; /* Aumenta el espacio entre bloques */
+    color: #f2f2f2;
+    font-size: 14px; /* Tamaño más pequeño del texto */
+    text-align: center;
+}
+
+/* Título principal del footer */
+footer h3 {
+    text-align: center;
+    color: #f2f2f2;
+    margin-bottom: 40px; /* Espacio entre el título y el contenido */
+    font-size: 24px; /* Tamaño más grande del título principal */
+}
+
+/* Título final */
+.titulo-final {
+    text-align: center;
+    color: #f2f2f2;
+    padding-top: 20px;
+}
+
+/* Ajusta el espacio entre los elementos del footer */
+footer .content-foo {
+    gap: 40px; /* Aumenta la separación entre los bloques de información */
+    border-bottom: 1px solid#ccc;
+}
+@media screen and (max-whith:900px) {
+    header{
+        background-position: center;
+    }.sobre-nosotros{
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}
+.boton-jugar {
+    padding: 10px 20px;
+    font-size: 20px;
+    background-color: #4CAF50; /* Color original */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s; /* Transición suave */
+    align-items: center;
+    margin:60px ;
+}
+
+.boton-jugar:hover {
+    background-color: blue; /* Color al pasar el mouse */
+    
+}
+.mejorar{
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+    background-color: #fffdfd; /* Color de fondo opcional */
+    
+}
+.mejorar h3{
+    text-align: center;
+    color: #4CAF50;
+    margin: 40px; /* Espacio entre el título y el contenido */
+    font-size: 20px; /* Tamaño más pequeño del título */
+    text-align: justify;
+}
+/* Contenedor del video */
+.video-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 40px auto; /* Incrementa el margen superior e inferior para más separación */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+/* Estilo del video para que sea responsivo */
+video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
