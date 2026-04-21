@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// Controlador central de interacciones.
-/// Decide qué ocurre cuando el jugador interactúa con un objeto.
+/// Recibe datos de un interactuable y delega la lógica al sistema correcto
+/// (diálogo, clima, recolección, etc.) sin conocer los detalles de cada uno.
 /// </summary>
 public class InteractionController : MonoBehaviour
 {
@@ -16,15 +17,8 @@ public class InteractionController : MonoBehaviour
         get
         {
             if (instance == null)
-            {
                 instance = FindObjectOfType<InteractionController>();
 
-                if (instance == null)
-                {
-                    GameObject obj = new GameObject("InteractionController");
-                    instance = obj.AddComponent<InteractionController>();
-                }
-            }
             return instance;
         }
     }
@@ -41,7 +35,7 @@ public class InteractionController : MonoBehaviour
     }
 
     /// <summary>
-    /// Procesa una interacción basada en los datos del objeto.
+    /// Punto de entrada principal. Evalúa el tipo de interacción y delega al sistema correcto.
     /// </summary>
     public void ProcessInteraction(InteractableData data)
     {
@@ -69,48 +63,64 @@ public class InteractionController : MonoBehaviour
     }
 
     /// <summary>
-    /// Maneja interacciones de inspección.
+    /// Inspeccionar: puede derivar en diálogo si el objeto tiene uno asignado.
     /// </summary>
     private void HandleInspect(InteractableData data)
     {
         if (data.TriggersDialogue && data.DialogueData != null)
         {
-            GameStateController.Instance.RequestState(GameState.Dialogue);
-            // Aquí luego conectamos con DialogueController
+            StartDialogue(data.DialogueData);
+            return;
         }
+
+        // Sin diálogo: mostrar solo descripción (la UI reacciona a OnTargetChanged en PlayerInteractor)
+        Debug.Log($"[Inspect] {data.DisplayName}: {data.Description}");
     }
 
     /// <summary>
-    /// Maneja interacciones de recolección.
+    /// Recolectar: placeholder hasta que exista un InventorySystem.
     /// </summary>
     private void HandleCollect(InteractableData data)
     {
-        Debug.Log($"Recolectado: {data.DisplayName}");
-        // Aquí iría inventario / progreso
+        // TODO: conectar con InventorySystem cuando esté disponible
+        Debug.Log($"[Collect] {data.DisplayName}");
     }
 
     /// <summary>
-    /// Maneja interacciones de diálogo.
+    /// Iniciar conversación directa con un NPC.
     /// </summary>
     private void HandleDialogue(InteractableData data)
     {
         if (data.DialogueData == null)
+        {
+            Debug.LogWarning($"[Dialogue] '{data.DisplayName}' no tiene DialogueData asignada.", this);
             return;
+        }
 
-        GameStateController.Instance.RequestState(GameState.Dialogue);
-
-        // Aquí luego conectamos DialogueController
+        StartDialogue(data.DialogueData);
     }
 
     /// <summary>
-    /// Maneja activación de eventos (clima, etc).
+    /// Disparar evento climático desde una interacción (p.ej. tocar un artefacto).
     /// </summary>
     private void HandleEvent(InteractableData data)
     {
-        if (data.TriggersClimateEvent && data.ClimateEventData != null)
+        if (!data.TriggersClimateEvent || data.ClimateEventData == null)
         {
-            // Aquí luego conectamos ClimateController
-            Debug.Log("Evento climático activado");
+            Debug.LogWarning($"[Event] '{data.DisplayName}' no tiene ClimateEventData asignada.", this);
+            return;
         }
+
+        ClimateController.Instance.StartClimateEvent(data.ClimateEventData);
+    }
+
+    /// <summary>
+    /// Centraliza el inicio de un diálogo: cambia estado y notifica al DialogueController.
+    /// Separado para evitar duplicación entre HandleInspect y HandleDialogue.
+    /// </summary>
+    private void StartDialogue(DialogueData dialogueData)
+    {
+        GameStateController.Instance.RequestState(GameState.Dialogue);
+        DialogueController.Instance.StartDialogue(dialogueData);
     }
 }

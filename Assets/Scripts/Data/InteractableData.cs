@@ -9,50 +9,50 @@ public class InteractableData : ScriptableObject
 {
     [Header("Identification")]
 
-    [SerializeField, Tooltip("Identificador único del interactuable.")]
+    [SerializeField, Tooltip("Identificador único del interactuable. Usado por el sistema de progresión.")]
     private string id;
 
-    [SerializeField, Tooltip("Nombre visible del objeto.")]
+    [SerializeField, Tooltip("Nombre visible del objeto en la UI.")]
     private string displayName;
 
     [TextArea]
-    [SerializeField, Tooltip("Descripción educativa mostrada al jugador.")]
+    [SerializeField, Tooltip("Descripción educativa mostrada al jugador al inspeccionar.")]
     private string description;
 
-    [SerializeField, Tooltip("Icono usado en UI.")]
+    [SerializeField, Tooltip("Icono representativo usado en la UI.")]
     private Sprite icon;
 
     [Header("Interaction")]
 
-    [SerializeField, Tooltip("Tipo principal de interacción.")]
+    [SerializeField, Tooltip("Tipo de interacción que ejecuta este objeto.")]
     private InteractionType interactionType;
 
-    [SerializeField, Tooltip("Indica si puede activar un diálogo.")]
+    [Header("Dialogue")]
+
+    [SerializeField, Tooltip("Activa si este objeto inicia un diálogo al interactuar.")]
     private bool triggersDialogue;
 
-    [SerializeField, Tooltip("Indica si puede activar un evento climático.")]
+    [SerializeField, Tooltip("Datos del diálogo asociado. Requiere que 'Triggers Dialogue' esté activo.")]
+    private DialogueData dialogueData;
+
+    [Header("Climate Event")]
+
+    [SerializeField, Tooltip("Activa si este objeto dispara un evento climático al interactuar.")]
     private bool triggersClimateEvent;
 
-    [Header("References")]
+    [SerializeField, Tooltip("Evento climático asociado. Requiere que 'Triggers Climate Event' esté activo.")]
+    private ClimateEventData climateEventData;
 
-    [SerializeField, Tooltip("Referencia al diálogo asociado.")]
-    private ScriptableObject dialogueData;
-
-    [SerializeField, Tooltip("Referencia al evento climático asociado.")]
-    private ScriptableObject climateEventData;
-
-    // PROPERTIES
-
-    public string Id => id;
+    public string Id          => id;
     public string DisplayName => displayName;
     public string Description => description;
-    public Sprite Icon => icon;
+    public Sprite Icon        => icon;
 
     public InteractionType InteractionType => interactionType;
 
-    public bool TriggersDialogue => triggersDialogue;
-    public bool TriggersClimateEvent => triggersClimateEvent;
+    public bool         TriggersDialogue    => triggersDialogue;
+    public DialogueData DialogueData        => dialogueData;
 
-    public ScriptableObject DialogueData => dialogueData;
-    public ScriptableObject ClimateEventData => climateEventData;
+    public bool             TriggersClimateEvent => triggersClimateEvent;
+    public ClimateEventData ClimateEventData     => climateEventData;
 }
