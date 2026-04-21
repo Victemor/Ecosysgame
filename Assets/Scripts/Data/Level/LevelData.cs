@@ -10,53 +10,49 @@ public class LevelData : ScriptableObject
 {
     [Header("Identification")]
 
-    [SerializeField, Tooltip("Identificador único del nivel.")]
+    [SerializeField, Tooltip("Identificador único del nivel. Usado para guardar progreso.")]
     private string id;
 
-    [SerializeField, Tooltip("Nombre del nivel.")]
+    [SerializeField, Tooltip("Nombre mostrado al jugador en menús y HUD.")]
     private string displayName;
 
     [TextArea]
-    [SerializeField, Tooltip("Descripción del nivel.")]
+    [SerializeField, Tooltip("Descripción narrativa o educativa del nivel.")]
     private string description;
 
     [Header("Scene")]
 
-    [SerializeField, Tooltip("Nombre de la escena asociada.")]
+    [SerializeField, Tooltip("Nombre exacto de la escena de Unity asociada a este nivel.")]
     private string sceneName;
 
     [Header("Gameplay Content")]
 
-    [SerializeField, Tooltip("Lista de interactuables presentes en el nivel.")]
+    [SerializeField, Tooltip("Lista de interactuables disponibles en el nivel.")]
     private List<InteractableData> interactables;
-
-    [SerializeField, Tooltip("Lista de NPCs presentes en el nivel.")]
-    private List<ScriptableObject> npcs;
 
     [Header("Objectives")]
 
-    [SerializeField, Tooltip("Objetivos educativos del nivel.")]
+    [SerializeField, Tooltip("Objetivos educativos que el jugador debe completar.")]
     private List<ObjectiveData> objectives;
 
     [Header("Climate")]
 
-    [SerializeField, Tooltip("Perfil climático del nivel.")]
-    private ScriptableObject climateProfile;
+    [SerializeField, Tooltip("Perfil climático que define los eventos posibles en el nivel.")]
+    private ClimateProfile climateProfile;
 
     [Header("Audio")]
 
-    [SerializeField, Tooltip("Música del nivel.")]
+    [SerializeField, Tooltip("Música de fondo del nivel.")]
     private AudioClip backgroundMusic;
 
-    public string Id => id;
+    public string Id          => id;
     public string DisplayName => displayName;
     public string Description => description;
-    public string SceneName => sceneName;
+    public string SceneName   => sceneName;
 
     public IReadOnlyList<InteractableData> Interactables => interactables;
-    public IReadOnlyList<ScriptableObject> NPCs => npcs;
-    public IReadOnlyList<ObjectiveData> Objectives => objectives;
+    public IReadOnlyList<ObjectiveData>    Objectives    => objectives;
 
-    public ScriptableObject ClimateProfile => climateProfile;
-    public AudioClip BackgroundMusic => backgroundMusic;
+    public ClimateProfile ClimateProfile   => climateProfile;
+    public AudioClip      BackgroundMusic  => backgroundMusic;
 }
