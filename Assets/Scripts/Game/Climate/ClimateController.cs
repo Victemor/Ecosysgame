@@ -18,31 +18,20 @@ public class ClimateController : MonoBehaviour
         get
         {
             if (instance == null)
-            {
                 instance = FindObjectOfType<ClimateController>();
 
-                if (instance == null)
-                {
-                    GameObject obj = new GameObject("ClimateController");
-                    instance = obj.AddComponent<ClimateController>();
-                }
-            }
             return instance;
         }
     }
 
-    /// <summary>
-    /// Evento cuando inicia un evento climático.
-    /// </summary>
+    /// <summary>Evento cuando inicia un evento climático.</summary>
     public event Action<ClimateEventData> OnClimateEventStarted;
 
-    /// <summary>
-    /// Evento cuando finaliza un evento climático.
-    /// </summary>
+    /// <summary>Evento cuando finaliza un evento climático.</summary>
     public event Action<ClimateEventData> OnClimateEventEnded;
 
-    private ClimateProfile currentProfile;
-    private ClimateEventData activeEvent;
+    private ClimateProfile    currentProfile;
+    private ClimateEventData  activeEvent;
 
     private Coroutine climateRoutine;
     private Coroutine activeEventRoutine;
@@ -59,7 +48,7 @@ public class ClimateController : MonoBehaviour
     }
 
     /// <summary>
-    /// Inicializa el sistema climático con un perfil de nivel.
+    /// Inicializa el sistema climático con el perfil del nivel actual.
     /// </summary>
     public void Initialize(ClimateProfile profile)
     {
@@ -72,7 +61,7 @@ public class ClimateController : MonoBehaviour
     }
 
     /// <summary>
-    /// Loop principal que decide cuándo activar eventos.
+    /// Loop principal que decide cuándo disparar eventos aleatorios.
     /// </summary>
     private IEnumerator ClimateLoop()
     {
@@ -83,18 +72,14 @@ public class ClimateController : MonoBehaviour
             if (activeEvent != null)
                 continue;
 
-            float roll = UnityEngine.Random.value;
-
-            if (roll <= currentProfile.EventProbability)
-            {
-                ClimateEventData randomEvent = GetRandomEvent();
-                StartClimateEvent(randomEvent);
-            }
+            if (UnityEngine.Random.value <= currentProfile.EventProbability)
+                StartClimateEvent(GetRandomEvent());
         }
     }
 
     /// <summary>
-    /// Inicia un evento climático manualmente (desde diálogo o interacción).
+    /// Inicia un evento climático. Si ya hay uno activo lo termina primero.
+    /// Puede llamarse tanto por el loop automático como por interacción o debug.
     /// </summary>
     public void StartClimateEvent(ClimateEventData eventData)
     {
@@ -102,9 +87,7 @@ public class ClimateController : MonoBehaviour
             return;
 
         if (activeEvent != null)
-        {
             EndCurrentEvent();
-        }
 
         activeEvent = eventData;
 
@@ -116,57 +99,48 @@ public class ClimateController : MonoBehaviour
     }
 
     /// <summary>
-    /// Rutina que controla la duración del evento.
+    /// Detiene el evento activo antes de que termine su duración natural.
+    /// Pensado para debug y para diálogos que puedan cancelar un evento.
     /// </summary>
+    public void ForceStopEvent()
+    {
+        if (activeEventRoutine != null)
+        {
+            StopCoroutine(activeEventRoutine);
+            activeEventRoutine = null;
+        }
+
+        EndCurrentEvent();
+    }
+
     private IEnumerator EventDurationRoutine(float duration)
     {
         yield return new WaitForSeconds(duration);
         EndCurrentEvent();
     }
 
-    /// <summary>
-    /// Finaliza el evento actual.
-    /// </summary>
     private void EndCurrentEvent()
     {
         if (activeEvent == null)
             return;
 
         ResetEffects(activeEvent.Effect);
-
         OnClimateEventEnded?.Invoke(activeEvent);
-
         activeEvent = null;
     }
 
-    /// <summary>
-    /// Aplica efectos del evento climático.
-    /// </summary>
     private void ApplyEffects(ClimateEffect effect)
     {
-        if (effect == null)
-            return;
-
-        // Aquí NO ejecutamos lógica directa compleja
-        // Solo ejemplo base (luego se conecta a otros sistemas)
-
-        Debug.Log($"Aplicando efectos climáticos: Agua {effect.WaterLevelModifier}");
+        if (effect == null) return;
+        Debug.Log($"[Climate] Aplicando efectos: agua={effect.WaterLevelModifier}, luz={effect.LightIntensityModifier}");
     }
 
-    /// <summary>
-    /// Revierte efectos aplicados.
-    /// </summary>
     private void ResetEffects(ClimateEffect effect)
     {
-        if (effect == null)
-            return;
-
-        Debug.Log("Reseteando efectos climáticos");
+        if (effect == null) return;
+        Debug.Log("[Climate] Efectos reseteados.");
     }
 
-    /// <summary>
-    /// Obtiene un evento aleatorio del perfil.
-    /// </summary>
     private ClimateEventData GetRandomEvent()
     {
         var list = currentProfile.PossibleEvents;
@@ -174,17 +148,12 @@ public class ClimateController : MonoBehaviour
         if (list == null || list.Count == 0)
             return null;
 
-        int index = UnityEngine.Random.Range(0, list.Count);
-        return list[index];
+        return list[UnityEngine.Random.Range(0, list.Count)];
     }
 
-    /// <summary>
-    /// Indica si hay un evento activo.
-    /// </summary>
+    /// <summary>Indica si hay un evento activo actualmente.</summary>
     public bool HasActiveEvent => activeEvent != null;
 
-    /// <summary>
-    /// Evento climático actual.
-    /// </summary>
+    /// <summary>Referencia al evento climático en curso.</summary>
     public ClimateEventData ActiveEvent => activeEvent;
 }

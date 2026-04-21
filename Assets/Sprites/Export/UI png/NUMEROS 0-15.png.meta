@@ -1,43 +1,31 @@
 fileFormatVersion: 2
-guid: e6016a5539636b74aa16280e6eee7932
+guid: a00c266d6cca0b649a65a78d55157144
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1228329997906636872
-    second: NUMEROS 0-12_0
+      213: 5276141298748513242
+    second: NUMEROS 0-15_0
   - first:
-      213: 2155526949867585109
-    second: NUMEROS 0-12_1
+      213: 2491241757254834199
+    second: NUMEROS 0-15_1
   - first:
-      213: 2611596296568336567
-    second: NUMEROS 0-12_2
+      213: -84318831177334032
+    second: NUMEROS 0-15_2
   - first:
-      213: 3667266134726963214
-    second: NUMEROS 0-12_3
+      213: 8996429442357326606
+    second: NUMEROS 0-15_3
   - first:
-      213: 3268026995747397783
-    second: NUMEROS 0-12_4
+      213: -7946261242407416288
+    second: NUMEROS 0-15_4
   - first:
-      213: -3907331768276544741
-    second: NUMEROS 0-12_5
+      213: -2780588532885151541
+    second: NUMEROS 0-15_5
   - first:
-      213: 2770544171711768908
-    second: NUMEROS 0-12_6
+      213: -1490324864699664000
+    second: NUMEROS 0-15_6
   - first:
-      213: 8152390951107256802
-    second: NUMEROS 0-12_7
-  - first:
-      213: -5817711054588244962
-    second: NUMEROS 0-12_8
-  - first:
-      213: 459459173859668148
-    second: NUMEROS 0-12_9
-  - first:
-      213: -3257499435231342652
-    second: NUMEROS 0-12_10
-  - first:
-      213: -2289294811960334274
-    second: NUMEROS 0-12_11
+      213: 1580171569480651472
+    second: NUMEROS 0-15_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -70,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -79,7 +67,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -108,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -159,13 +147,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: NUMEROS 0-12_0
+      name: NUMEROS 0-15_0
       rect:
         serializedVersion: 2
-        x: 11
+        x: 10
         y: 31
-        width: 7
-        height: 6
+        width: 20
+        height: 12
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -174,19 +162,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8407e2800a7eb0110800000000000000
-      internalID: 1228329997906636872
+      spriteID: adb5ca89e8e983940800000000000000
+      internalID: 5276141298748513242
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NUMEROS 0-12_1
+      name: NUMEROS 0-15_1
       rect:
         serializedVersion: 2
-        x: 17
-        y: 36
-        width: 7
+        x: 10
+        y: 26
+        width: 8
         height: 6
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -196,41 +184,63 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 55e73a62758f9ed10800000000000000
-      internalID: 2155526949867585109
+      spriteID: 7185bc6dd2ba29220800000000000000
+      internalID: 2491241757254834199
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NUMEROS 0-12_2
-      rect:
-        serializedVersion: 2
-        x: 23
-        y: 36
-        width: 7
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7b07ea1bef04e3420800000000000000
-      internalID: 2611596296568336567
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: NUMEROS 0-12_3
+      name: NUMEROS 0-15_2
       rect:
         serializedVersion: 2
         x: 29
         y: 31
         width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f28cc3487074def0800000000000000
+      internalID: -84318831177334032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NUMEROS 0-15_3
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 15
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e03f296a9ecb9dc70800000000000000
+      internalID: 8996429442357326606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NUMEROS 0-15_4
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 10
+        width: 8
         height: 6
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -240,107 +250,41 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e0078399e1fb4e230800000000000000
-      internalID: 3667266134726963214
+      spriteID: 02e0ad9408539b190800000000000000
+      internalID: -7946261242407416288
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NUMEROS 0-12_4
-      rect:
-        serializedVersion: 2
-        x: 17
-        y: 20
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 79029e5ec3d5a5d20800000000000000
-      internalID: 3268026995747397783
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: NUMEROS 0-12_5
-      rect:
-        serializedVersion: 2
-        x: 23
-        y: 20
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b13174c657e56c9c0800000000000000
-      internalID: -3907331768276544741
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: NUMEROS 0-12_6
-      rect:
-        serializedVersion: 2
-        x: 29
-        y: 25
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c49a865ce33f27620800000000000000
-      internalID: 2770544171711768908
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: NUMEROS 0-12_7
-      rect:
-        serializedVersion: 2
-        x: 11
-        y: 9
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2e16bd6706c132170800000000000000
-      internalID: 8152390951107256802
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: NUMEROS 0-12_8
+      name: NUMEROS 0-15_5
       rect:
         serializedVersion: 2
         x: 29
         y: 15
         width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc02bd6267d5969d0800000000000000
+      internalID: -2780588532885151541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NUMEROS 0-15_6
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 10
+        width: 7
         height: 6
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -350,41 +294,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e1c87619e96534fa0800000000000000
-      internalID: -5817711054588244962
+      spriteID: 089f4af7e6d415be0800000000000000
+      internalID: -1490324864699664000
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NUMEROS 0-12_9
+      name: NUMEROS 0-15_7
       rect:
         serializedVersion: 2
-        x: 29
-        y: 9
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4b033be2fa3506600800000000000000
-      internalID: 459459173859668148
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: NUMEROS 0-12_10
-      rect:
-        serializedVersion: 2
-        x: 17
+        x: 16
         y: 4
-        width: 7
+        width: 14
         height: 7
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -394,30 +316,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4cf000bc5890bc2d0800000000000000
-      internalID: -3257499435231342652
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: NUMEROS 0-12_11
-      rect:
-        serializedVersion: 2
-        x: 23
-        y: 4
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e38a5fa6f7aca30e0800000000000000
-      internalID: -2289294811960334274
+      spriteID: 0d2d01b9ba5ede510800000000000000
+      internalID: 1580171569480651472
       vertices: []
       indices: 
       edges: []
@@ -426,7 +326,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -436,18 +336,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      NUMEROS 0-12_0: 1228329997906636872
-      NUMEROS 0-12_1: 2155526949867585109
-      NUMEROS 0-12_10: -3257499435231342652
-      NUMEROS 0-12_11: -2289294811960334274
-      NUMEROS 0-12_2: 2611596296568336567
-      NUMEROS 0-12_3: 3667266134726963214
-      NUMEROS 0-12_4: 3268026995747397783
-      NUMEROS 0-12_5: -3907331768276544741
-      NUMEROS 0-12_6: 2770544171711768908
-      NUMEROS 0-12_7: 8152390951107256802
-      NUMEROS 0-12_8: -5817711054588244962
-      NUMEROS 0-12_9: 459459173859668148
+      NUMEROS 0-15_0: 5276141298748513242
+      NUMEROS 0-15_1: 2491241757254834199
+      NUMEROS 0-15_2: -84318831177334032
+      NUMEROS 0-15_3: 8996429442357326606
+      NUMEROS 0-15_4: -7946261242407416288
+      NUMEROS 0-15_5: -2780588532885151541
+      NUMEROS 0-15_6: -1490324864699664000
+      NUMEROS 0-15_7: 1580171569480651472
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

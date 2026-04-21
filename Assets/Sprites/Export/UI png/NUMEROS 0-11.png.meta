@@ -1,19 +1,28 @@
 fileFormatVersion: 2
-guid: 99797bd68bf3f064eb1bae4627f8024b
+guid: 54329ec830d078140bffceb5c55d52e8
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8228652520581305594
-    second: NUMEROS 0-10_0
+      213: 6501577650455643462
+    second: NUMEROS 0-11_0
   - first:
-      213: -6463664868993052740
-    second: NUMEROS 0-10_1
+      213: -6185471088417243316
+    second: NUMEROS 0-11_1
   - first:
-      213: 2305764274175481432
-    second: NUMEROS 0-10_2
+      213: 8176582928745236233
+    second: NUMEROS 0-11_2
   - first:
-      213: -2962867928138863155
-    second: NUMEROS 0-10_3
+      213: -3982022015205954667
+    second: NUMEROS 0-11_3
+  - first:
+      213: -684323805817394554
+    second: NUMEROS 0-11_4
+  - first:
+      213: 5904081514043635975
+    second: NUMEROS 0-11_5
+  - first:
+      213: -9171888971649827308
+    second: NUMEROS 0-11_6
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +55,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -55,7 +64,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -84,7 +93,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -135,13 +144,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: NUMEROS 0-10_0
+      name: NUMEROS 0-11_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 26
-        width: 9
-        height: 8
+        x: 12
+        y: 31
+        width: 8
+        height: 7
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -150,18 +159,40 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: af41f55cedb023270800000000000000
-      internalID: 8228652520581305594
+      spriteID: 645070f1d6e3a3a50800000000000000
+      internalID: 6501577650455643462
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NUMEROS 0-10_1
+      name: NUMEROS 0-11_1
       rect:
         serializedVersion: 2
-        x: 15
-        y: 33
+        x: 19
+        y: 37
+        width: 13
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4ff07e21dac82aa0800000000000000
+      internalID: -6185471088417243316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NUMEROS 0-11_2
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 31
         width: 9
         height: 7
       alignment: 0
@@ -172,19 +203,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cbf4f703c037c46a0800000000000000
-      internalID: -6463664868993052740
+      spriteID: 90702603ade097170800000000000000
+      internalID: 8176582928745236233
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NUMEROS 0-10_2
+      name: NUMEROS 0-11_3
       rect:
         serializedVersion: 2
-        x: 23
-        y: 33
-        width: 9
+        x: 19
+        y: 13
+        width: 13
         height: 13
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -194,20 +225,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 85614021468bfff10800000000000000
-      internalID: 2305764274175481432
+      spriteID: 59b2dd723140db8c0800000000000000
+      internalID: -3982022015205954667
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NUMEROS 0-10_3
+      name: NUMEROS 0-11_4
       rect:
         serializedVersion: 2
-        x: 23
-        y: 2
+        x: 30
+        y: 25
         width: 9
-        height: 32
+        height: 7
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -216,8 +247,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: dcda2ea3157c1e6d0800000000000000
-      internalID: -2962867928138863155
+      spriteID: 68a29e2df1bc086f0800000000000000
+      internalID: -684323805817394554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NUMEROS 0-11_5
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 1
+        width: 8
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70975891bd28fe150800000000000000
+      internalID: 5904081514043635975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NUMEROS 0-11_6
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 1
+        width: 20
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41e3d753397e6b080800000000000000
+      internalID: -9171888971649827308
       vertices: []
       indices: 
       edges: []
@@ -226,7 +301,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -236,10 +311,13 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      NUMEROS 0-10_0: 8228652520581305594
-      NUMEROS 0-10_1: -6463664868993052740
-      NUMEROS 0-10_2: 2305764274175481432
-      NUMEROS 0-10_3: -2962867928138863155
+      NUMEROS 0-11_0: 6501577650455643462
+      NUMEROS 0-11_1: -6185471088417243316
+      NUMEROS 0-11_2: 8176582928745236233
+      NUMEROS 0-11_3: -3982022015205954667
+      NUMEROS 0-11_4: -684323805817394554
+      NUMEROS 0-11_5: 5904081514043635975
+      NUMEROS 0-11_6: -9171888971649827308
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
