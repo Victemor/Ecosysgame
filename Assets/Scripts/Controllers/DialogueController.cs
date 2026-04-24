@@ -5,13 +5,15 @@ using UnityEngine;
 /// <summary>
 /// Controlador central del sistema de diálogo.
 /// Gestiona el flujo de nodos y comunica eventos a otros sistemas.
+/// Este sistema NO conoce qué estado del juego debe aplicarse al terminar;
+/// delega esa responsabilidad a quien escuche OnDialogueEnded.
 /// </summary>
 public class DialogueController : MonoBehaviour
 {
     private static DialogueController instance;
 
     /// <summary>
-    /// Acceso global seguro.
+    /// Acceso global seguro. Crea la instancia si no existe en escena.
     /// </summary>
     public static DialogueController Instance
     {
@@ -42,17 +44,19 @@ public class DialogueController : MonoBehaviour
     public event Action<DialogueNode> OnNodeChanged;
 
     /// <summary>
-    /// Evento cuando hay opciones disponibles.
+    /// Evento cuando hay opciones disponibles para el jugador.
     /// </summary>
     public event Action<DialogueChoice[]> OnChoicesAvailable;
 
     /// <summary>
     /// Evento al finalizar diálogo.
+    /// Otros sistemas (ej. GameplayController) deben suscribirse
+    /// para restaurar el estado de juego correspondiente.
     /// </summary>
     public event Action OnDialogueEnded;
 
     /// <summary>
-    /// Evento cuando se dispara un evento de diálogo.
+    /// Evento cuando se dispara un evento embebido en un nodo de diálogo.
     /// </summary>
     public event Action<DialogueEvent> OnDialogueEventTriggered;
 
@@ -71,7 +75,7 @@ public class DialogueController : MonoBehaviour
     }
 
     /// <summary>
-    /// Inicia un diálogo.
+    /// Inicia un diálogo desde su nodo raíz.
     /// </summary>
     public void StartDialogue(DialogueData dialogueData)
     {
@@ -79,7 +83,7 @@ public class DialogueController : MonoBehaviour
             return;
 
         currentDialogue = dialogueData;
-        currentNode = dialogueData.StartNode;
+        currentNode     = dialogueData.StartNode;
 
         OnDialogueStarted?.Invoke(currentDialogue);
 
@@ -87,38 +91,13 @@ public class DialogueController : MonoBehaviour
     }
 
     /// <summary>
-    /// Procesa el nodo actual.
-    /// </summary>
-    private void ProcessNode(DialogueNode node)
-    {
-        if (node == null)
-        {
-            EndDialogue();
-            return;
-        }
-
-        currentNode = node;
-
-        // Evento al entrar al nodo
-        if (node.DialogueEvent != null)
-        {
-            OnDialogueEventTriggered?.Invoke(node.DialogueEvent);
-        }
-
-        OnNodeChanged?.Invoke(node);
-
-        // Si hay opciones → UI decide
-        if (node.Choices != null && node.Choices.Count > 0)
-        {
-            OnChoicesAvailable?.Invoke(node.Choices.ToArray());
-        }
-    }
-
-    /// <summary>
-    /// Continúa al siguiente nodo (flujo lineal).
+    /// Continúa al siguiente nodo en un flujo lineal (sin opciones).
     /// </summary>
     public void Continue()
     {
+        if (currentNode == null)
+            return;
+
         if (string.IsNullOrEmpty(currentNode.NextNodeId))
         {
             EndDialogue();
@@ -130,11 +109,11 @@ public class DialogueController : MonoBehaviour
     }
 
     /// <summary>
-    /// Selecciona una opción del jugador.
+    /// Selecciona una opción del jugador y avanza al nodo correspondiente.
     /// </summary>
     public void SelectChoice(int index)
     {
-        if (currentNode.Choices == null || index < 0 || index >= currentNode.Choices.Count)
+        if (currentNode?.Choices == null || index < 0 || index >= currentNode.Choices.Count)
             return;
 
         string nextId = currentNode.Choices[index].NextNodeId;
@@ -144,23 +123,46 @@ public class DialogueController : MonoBehaviour
     }
 
     /// <summary>
-    /// Finaliza el diálogo.
+    /// Evalúa el nodo recibido: dispara eventos embebidos, notifica cambio
+    /// y expone opciones si las hay.
+    /// </summary>
+    private void ProcessNode(DialogueNode node)
+    {
+        if (node == null)
+        {
+            EndDialogue();
+            return;
+        }
+
+        currentNode = node;
+
+        if (node.DialogueEvent != null)
+            OnDialogueEventTriggered?.Invoke(node.DialogueEvent);
+
+        OnNodeChanged?.Invoke(node);
+
+        if (node.Choices != null && node.Choices.Count > 0)
+            OnChoicesAvailable?.Invoke(node.Choices.ToArray());
+    }
+
+    /// <summary>
+    /// Finaliza el diálogo limpiando el estado interno.
+    /// NO cambia el GameState directamente; dispara OnDialogueEnded
+    /// para que los suscriptores (ej. GameplayController) reaccionen.
     /// </summary>
     private void EndDialogue()
     {
         currentDialogue = null;
-        currentNode = null;
+        currentNode     = null;
 
         OnDialogueEnded?.Invoke();
-
-        GameStateController.Instance.RequestState(GameState.Gameplay);
     }
 
     /// <summary>
-    /// Busca un nodo por ID dentro del diálogo actual.
+    /// Busca un nodo por su ID dentro del diálogo activo.
     /// </summary>
     private DialogueNode FindNodeById(string id)
     {
-        return currentDialogue.Nodes.FirstOrDefault(n => n.NodeId == id);
+        return currentDialogue?.Nodes.FirstOrDefault(n => n.NodeId == id);
     }
 }
