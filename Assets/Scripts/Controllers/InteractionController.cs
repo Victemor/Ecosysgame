@@ -4,6 +4,11 @@ using UnityEngine;
 /// Controlador central de interacciones.
 /// Recibe datos de un interactuable y delega la lógica al sistema correcto
 /// (diálogo, clima, recolección, etc.) sin conocer los detalles de cada uno.
+///
+/// IMPORTANTE: Este componente debe estar presente en la escena manualmente.
+/// A diferencia de GameManager o DialogueController, InteractionController
+/// no se auto-crea porque depende de contexto de escena activa.
+/// Si no está en escena, Interactable.Interact() lanzará un error claro.
 /// </summary>
 public class InteractionController : MonoBehaviour
 {
@@ -11,13 +16,25 @@ public class InteractionController : MonoBehaviour
 
     /// <summary>
     /// Acceso global seguro al controlador.
+    /// Retorna null si no existe en escena y registra un error descriptivo.
+    /// No se auto-crea intencionalmente: este sistema requiere configuración de escena.
     /// </summary>
     public static InteractionController Instance
     {
         get
         {
             if (instance == null)
+            {
                 instance = FindObjectOfType<InteractionController>();
+
+                if (instance == null)
+                {
+                    Debug.LogError(
+                        "[InteractionController] No se encontró ninguna instancia en la escena. " +
+                        "Agrega el componente InteractionController a un GameObject en la escena activa."
+                    );
+                }
+            }
 
             return instance;
         }
@@ -59,11 +76,16 @@ public class InteractionController : MonoBehaviour
             case InteractionType.TriggerEvent:
                 HandleEvent(data);
                 break;
+
+            default:
+                Debug.LogWarning($"[InteractionController] Tipo de interacción no manejado: {data.InteractionType}", this);
+                break;
         }
     }
 
     /// <summary>
     /// Inspeccionar: puede derivar en diálogo si el objeto tiene uno asignado.
+    /// Si no tiene diálogo, la UI reacciona a OnTargetChanged en PlayerInteractor.
     /// </summary>
     private void HandleInspect(InteractableData data)
     {
@@ -73,7 +95,6 @@ public class InteractionController : MonoBehaviour
             return;
         }
 
-        // Sin diálogo: mostrar solo descripción (la UI reacciona a OnTargetChanged en PlayerInteractor)
         Debug.Log($"[Inspect] {data.DisplayName}: {data.Description}");
     }
 

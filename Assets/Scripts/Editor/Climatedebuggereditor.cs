@@ -1,6 +1,12 @@
-// Este archivo DEBE estar en una carpeta llamada Editor/
-// Ruta: Assets/Scripts/Editor/ClimateDebuggerEditor.cs
-// No se incluye en builds de producción automáticamente.
+// ─────────────────────────────────────────────────────────────────────────────
+// RUTA CORRECTA: Assets/Scripts/Editor/ClimateDebuggerEditor.cs
+//
+// PROBLEMA CORREGIDO: El archivo estaba en Assets/Scripts/Game/Debug/
+// Los archivos que usan "using UnityEditor" DEBEN estar en una carpeta
+// llamada "Editor" para que Unity los excluya automáticamente de los builds
+// de producción. Sin esta ubicación, el build falla porque UnityEditor.dll
+// no existe en runtime.
+// ─────────────────────────────────────────────────────────────────────────────
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -15,7 +21,6 @@ using UnityEngine;
 [CustomEditor(typeof(ClimateDebugger))]
 public class ClimateDebuggerEditor : Editor
 {
-    // Colores de los botones
     private static readonly Color ColorTrigger  = new Color(0.25f, 0.65f, 1f);
     private static readonly Color ColorStop     = new Color(1f, 0.35f, 0.35f);
     private static readonly Color ColorActive   = new Color(0.3f, 0.85f, 0.45f);
@@ -25,12 +30,10 @@ public class ClimateDebuggerEditor : Editor
     {
         ClimateDebugger debugger = (ClimateDebugger)target;
 
-        // ── Propiedades serializadas normales ──────────────────────────────
         DrawDefaultInspector();
 
         EditorGUILayout.Space(12);
 
-        // ── Solo funciona en Play Mode ─────────────────────────────────────
         if (!Application.isPlaying)
         {
             EditorGUILayout.HelpBox(
@@ -77,9 +80,7 @@ public class ClimateDebuggerEditor : Editor
                 GUI.color = ColorTrigger;
 
                 if (GUILayout.Button($"▶  {evt.DisplayName}  (intensidad {evt.Intensity:F1})", GUILayout.Height(32)))
-                {
                     debugger.TriggerEvent(i);
-                }
 
                 GUI.color = Color.white;
             }
@@ -94,15 +95,11 @@ public class ClimateDebuggerEditor : Editor
         GUI.color   = ColorStop;
 
         if (GUILayout.Button("■  Detener evento actual", GUILayout.Height(36)))
-        {
             debugger.StopCurrentEvent();
-        }
 
         GUI.color   = Color.white;
         GUI.enabled = true;
 
-        // Fuerza repintado del Inspector cada frame en Play Mode para
-        // mantener el estado del evento sincronizado visualmente.
         if (Application.isPlaying)
             Repaint();
     }
