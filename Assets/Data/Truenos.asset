@@ -12,13 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ca9a9e95ea685b43b5a9a3c69c79d23, type: 3}
   m_Name: Truenos
   m_EditorClassIdentifier: Assembly-CSharp::ClimateEventData
-  id: 
-  displayName: 
-  description: 
+  id: Truenos
+  displayName: Truenos
+  description: Truenos
   duration: 0
   intensity: 0
   effect:
     waterLevelModifier: 0
+    rainIntensity: 0
     lightIntensityModifier: 0
+    lightningIntensity: 0
     resourceModifier: 0
     faunaSpawnModifier: 0
