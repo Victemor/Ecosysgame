@@ -690,10 +690,11 @@ MonoBehaviour:
   target: {fileID: 177518933}
   useSmoothing: 0
   smoothSpeed: 5
-  boundMinX: -9.95
-  boundMaxX: 9.96
-  boundMinZ: -4.29
-  boundMaxZ: 3.46
+  useBoundaries: 1
+  boundMinX: -9.15
+  boundMaxX: 9.1
+  boundMinZ: -5.54
+  boundMaxZ: 4.41
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -11462,6 +11463,10 @@ PrefabInstance:
     - target: {fileID: 3006995586699268484, guid: c2ba1a310920ff04fac8e8b8c9815400, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3375354028355439374, guid: c2ba1a310920ff04fac8e8b8c9815400, type: 3}
+      propertyPath: m_SortingOrder
+      value: -100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -1,9 +1,9 @@
 using UnityEngine;
 
 /// <summary>
-/// Sistema de cámara con seguimiento completo del personaje (X, Y y Z).
-/// Proyecta el rayo central del viewport a la Y real del personaje,
-/// funcionando correctamente con cualquier rotación de cámara y terreno irregular.
+/// Sistema de cámara isométrica para mundo plano.
+/// El cuadro azul (viewport proyectado en el suelo) nunca puede
+/// salir del cuadro verde (límites del terreno).
 /// </summary>
 public class CameraSystem : MonoBehaviour
 {
@@ -14,39 +14,33 @@ public class CameraSystem : MonoBehaviour
 
     [Header("Smoothing")]
 
-    [SerializeField, Tooltip("Desactivar para pixel art — evita borrosidad por subpíxel.")]
+    [SerializeField, Tooltip("Desactivar para pixel art. Evita borrosidad.")]
     private bool useSmoothing = false;
 
-    [SerializeField, Tooltip("Factor de suavizado si está activado.")]
+    [SerializeField, Tooltip("Velocidad de suavizado si está activado.")]
     private float smoothSpeed = 15f;
 
     [Header("World Boundaries")]
 
-    [SerializeField, Tooltip("Límite mínimo del mundo en X.")]
-    private float boundMinX = -50f;
-
-    [SerializeField, Tooltip("Límite máximo del mundo en X.")]
-    private float boundMaxX = 50f;
-
-    [SerializeField, Tooltip("Límite mínimo del mundo en Z.")]
-    private float boundMinZ = -50f;
-
-    [SerializeField, Tooltip("Límite máximo del mundo en Z.")]
-    private float boundMaxZ = 50f;
+    [SerializeField, Tooltip("Renderer del terreno. Define el cuadro verde.")]
+    private Renderer groundRenderer;
 
     // ── Estado interno ───────────────────────────────────────────────
 
     private Camera  cam;
     private Vector3 currentVelocity;
-    private float   halfWidthOnGround;
-    private float   halfHeightOnGround;
 
     /// <summary>
-    /// Offset fijo en Y entre la cámara y el personaje.
-    /// Se calcula al inicio y se mantiene constante para que la cámara
-    /// suba y baje junto al personaje preservando la vista isométrica.
+    /// Offsets desde la posición XZ de la cámara hasta cada borde del
+    /// cuadro azul proyectado en el suelo. Son constantes porque la
+    /// rotación de la cámara no cambia nunca.
     /// </summary>
-    private float cameraYOffset;
+    private float offsetLeft;   // negativo: cuánto sobresale el viewport a la izquierda
+    private float offsetRight;  // positivo: cuánto sobresale a la derecha
+    private float offsetBottom; // negativo: cuánto sobresale hacia la cámara (Z-)
+    private float offsetTop;    // positivo: cuánto sobresale lejos de la cámara (Z+)
+
+    private bool offsetsReady;
 
     // ── Unity lifecycle ──────────────────────────────────────────────
 
@@ -57,10 +51,7 @@ public class CameraSystem : MonoBehaviour
 
     private void Start()
     {
-        if (target != null)
-            cameraYOffset = transform.position.y - target.position.y;
-
-        RecalculateViewportFootprint();
+        CalculateViewportOffsets();
         SnapToTarget();
     }
 
@@ -69,93 +60,118 @@ public class CameraSystem : MonoBehaviour
         if (target == null) return;
 
         Vector3 desired = CalculateCameraPosition();
-        Vector3 clamped = ApplyBoundaries(desired);
+        Vector3 clamped = offsetsReady ? ClampByViewportEdges(desired) : desired;
 
-        if (useSmoothing)
-        {
-            transform.position = Vector3.SmoothDamp(
-                transform.position, clamped, ref currentVelocity, 1f / smoothSpeed
-            );
-        }
-        else
-        {
-            transform.position = clamped;
-        }
+        transform.position = useSmoothing
+            ? Vector3.SmoothDamp(transform.position, clamped, ref currentVelocity, 1f / smoothSpeed)
+            : clamped;
     }
 
-    // ── Cálculo de posición ──────────────────────────────────────────
+    // ── Offsets del viewport ─────────────────────────────────────────
 
     /// <summary>
-    /// Calcula la posición de la cámara para centrar exactamente al personaje.
-    ///
-    /// Estrategia:
-    /// 1. Proyectar el centro del viewport a la Y REAL del personaje (no a groundY fijo).
-    /// 2. El delta XZ entre ese punto y el personaje es cuánto hay que mover la cámara.
-    /// 3. La Y de la cámara sigue al personaje manteniendo el offset inicial.
-    ///
-    /// Esto resuelve el problema de terreno irregular: si el personaje baja o sube,
-    /// la proyección y la altura de la cámara se adaptan automáticamente.
+    /// Calcula una sola vez cuánto sobresale el cuadro azul
+    /// más allá de la posición de la cámara en cada dirección.
+    /// Como la rotación es fija, estos valores nunca cambian.
     /// </summary>
+    private void CalculateViewportOffsets()
+    {
+        offsetsReady = false;
+
+        if (cam == null) return;
+
+        Vector3 camPos = transform.position;
+
+        Vector3 left   = ProjectViewportToY(new Vector3(0f,   0.5f, 0f), 0f);
+        Vector3 right  = ProjectViewportToY(new Vector3(1f,   0.5f, 0f), 0f);
+        Vector3 bottom = ProjectViewportToY(new Vector3(0.5f, 0f,   0f), 0f);
+        Vector3 top    = ProjectViewportToY(new Vector3(0.5f, 1f,   0f), 0f);
+
+        if (!IsValid(left) || !IsValid(right) || !IsValid(bottom) || !IsValid(top))
+        {
+            Debug.LogWarning("[CameraSystem] No se puede proyectar el viewport al suelo. " +
+                             "Verifica que la cámara esté por encima de Y=0.", this);
+            return;
+        }
+
+        offsetLeft   = left.x   - camPos.x;  // negativo
+        offsetRight  = right.x  - camPos.x;  // positivo
+        offsetBottom = bottom.z - camPos.z;   // negativo
+        offsetTop    = top.z    - camPos.z;   // positivo
+
+        offsetsReady = true;
+    }
+
+    // ── Seguimiento ──────────────────────────────────────────────────
+
     private Vector3 CalculateCameraPosition()
     {
-        // 1. Proyectar centro del viewport a la Y real del personaje
-        Vector3 currentLookPoint = ProjectViewportToY(new Vector3(0.5f, 0.5f, 0f), target.position.y);
+        Vector3 lookPoint = ProjectViewportToY(new Vector3(0.5f, 0.5f, 0f), target.position.y);
 
-        // 2. Delta XZ para centrar al personaje
-        float deltaX = target.position.x - currentLookPoint.x;
-        float deltaZ = target.position.z - currentLookPoint.z;
-
-        // 3. Y de la cámara sigue la Y del personaje manteniendo offset fijo
-        float desiredY = target.position.y + cameraYOffset;
+        if (!IsValid(lookPoint))
+            return transform.position;
 
         return new Vector3(
-            transform.position.x + deltaX,
-            desiredY,
-            transform.position.z + deltaZ
+            transform.position.x + (target.position.x - lookPoint.x),
+            transform.position.y,
+            transform.position.z + (target.position.z - lookPoint.z)
         );
     }
 
-    private Vector3 ApplyBoundaries(Vector3 desired)
+    /// <summary>
+    /// Clampea la posición de la cámara para que los BORDES del cuadro azul
+    /// no salgan del cuadro verde.
+    ///
+    /// Razonamiento:
+    /// - Borde izquierdo del azul = camPos.x + offsetLeft
+    /// - Para que no salga del verde: camPos.x + offsetLeft >= greenMinX
+    /// - Despejando: camPos.x >= greenMinX - offsetLeft
+    ///
+    /// Lo mismo para los otros tres lados.
+    /// </summary>
+    private Vector3 ClampByViewportEdges(Vector3 pos)
     {
+        if (groundRenderer == null) return pos;
+
+        Bounds b = groundRenderer.bounds;
+
+        float clampMinX = b.min.x - offsetLeft;    // borde izq azul no sale por izq verde
+        float clampMaxX = b.max.x - offsetRight;   // borde der azul no sale por der verde
+        float clampMinZ = b.min.z - offsetBottom;  // borde inf azul no sale por inf verde
+        float clampMaxZ = b.max.z - offsetTop;     // borde sup azul no sale por sup verde
+
+        // Si el terreno es más pequeño que el viewport, centrar la cámara
+        if (clampMinX > clampMaxX) { float cx = (b.min.x + b.max.x) / 2f; clampMinX = cx; clampMaxX = cx; }
+        if (clampMinZ > clampMaxZ) { float cz = (b.min.z + b.max.z) / 2f; clampMinZ = cz; clampMaxZ = cz; }
+
         return new Vector3(
-            Mathf.Clamp(desired.x, boundMinX + halfWidthOnGround,  boundMaxX - halfWidthOnGround),
-            desired.y,  // Y no se clampea: sigue libremente al personaje
-            Mathf.Clamp(desired.z, boundMinZ + halfHeightOnGround, boundMaxZ - halfHeightOnGround)
+            Mathf.Clamp(pos.x, clampMinX, clampMaxX),
+            pos.y,
+            Mathf.Clamp(pos.z, clampMinZ, clampMaxZ)
         );
     }
 
     // ── Proyección ───────────────────────────────────────────────────
 
-    /// <summary>
-    /// Proyecta un punto del viewport sobre el plano Y = targetY usando el rayo
-    /// real de la cámara. Al usar targetY = personaje.Y, la intersección es exacta
-    /// sin importar en qué altura esté el personaje.
-    /// </summary>
     private Vector3 ProjectViewportToY(Vector3 viewportPoint, float targetY)
     {
         Ray ray = cam.ViewportPointToRay(viewportPoint);
 
         if (Mathf.Abs(ray.direction.y) < 0.0001f)
-            return ray.origin;
+            return Vector3.positiveInfinity;
 
         float t = (targetY - ray.origin.y) / ray.direction.y;
+
+        if (t < 0f)
+            return Vector3.positiveInfinity;
+
         return ray.origin + t * ray.direction;
     }
 
-    private void RecalculateViewportFootprint()
+    private bool IsValid(Vector3 p)
     {
-        if (cam == null) return;
-
-        // Usar Y actual del target si existe, si no usar 0
-        float refY = target != null ? target.position.y : 0f;
-
-        Vector3 bl = ProjectViewportToY(new Vector3(0f, 0f, 0f), refY);
-        Vector3 br = ProjectViewportToY(new Vector3(1f, 0f, 0f), refY);
-        Vector3 tl = ProjectViewportToY(new Vector3(0f, 1f, 0f), refY);
-        Vector3 tr = ProjectViewportToY(new Vector3(1f, 1f, 0f), refY);
-
-        halfWidthOnGround  = (Mathf.Max(bl.x, br.x, tl.x, tr.x) - Mathf.Min(bl.x, br.x, tl.x, tr.x)) / 2f;
-        halfHeightOnGround = (Mathf.Max(bl.z, br.z, tl.z, tr.z) - Mathf.Min(bl.z, br.z, tl.z, tr.z)) / 2f;
+        return !float.IsInfinity(p.x) && !float.IsInfinity(p.z)
+            && !float.IsNaN(p.x)      && !float.IsNaN(p.z);
     }
 
     // ── API pública ──────────────────────────────────────────────────
@@ -164,61 +180,52 @@ public class CameraSystem : MonoBehaviour
     {
         if (target == null) return;
 
+        CalculateViewportOffsets();
         currentVelocity = Vector3.zero;
 
-        for (int i = 0; i < 2; i++)
-            transform.position = ApplyBoundaries(CalculateCameraPosition());
+        for (int i = 0; i < 3; i++)
+            transform.position = ClampByViewportEdges(CalculateCameraPosition());
     }
 
-    public void SetTarget(Transform newTarget)
-    {
-        target      = newTarget;
-        cameraYOffset = transform.position.y - target.position.y;
-    }
+    public void SetTarget(Transform newTarget) => target = newTarget;
 
     // ── Gizmos ───────────────────────────────────────────────────────
 
     private void OnDrawGizmosSelected()
     {
-        float refY = target != null ? target.position.y : 0f;
+        if (cam == null) cam = GetComponent<Camera>();
+        CalculateViewportOffsets();
 
-        Gizmos.color = new Color(0f, 1f, 0.5f, 0.6f);
-        DrawGroundRect(boundMinX, boundMaxX, boundMinZ, boundMaxZ, refY);
-
-        if (Application.isPlaying)
+        // Verde — terreno (cuadro verde)
+        if (groundRenderer != null)
         {
-            Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
-            DrawGroundRect(
-                boundMinX + halfWidthOnGround, boundMaxX - halfWidthOnGround,
-                boundMinZ + halfHeightOnGround, boundMaxZ - halfHeightOnGround,
-                refY
-            );
+            Bounds b = groundRenderer.bounds;
+            Gizmos.color = new Color(0f, 1f, 0.3f, 0.6f);
+            DrawRect(b.min.x, b.max.x, b.min.z, b.max.z, 0.05f);
         }
 
+        // Azul — viewport proyectado en el suelo (cuadro azul)
         if (cam != null)
         {
-            Gizmos.color = new Color(0.4f, 0.6f, 1f, 0.7f);
-            Vector3 bl = ProjectViewportToY(new Vector3(0f, 0f, 0f), refY);
-            Vector3 br = ProjectViewportToY(new Vector3(1f, 0f, 0f), refY);
-            Vector3 tl = ProjectViewportToY(new Vector3(0f, 1f, 0f), refY);
-            Vector3 tr = ProjectViewportToY(new Vector3(1f, 1f, 0f), refY);
-            Gizmos.DrawLine(bl, br);
-            Gizmos.DrawLine(br, tr);
-            Gizmos.DrawLine(tr, tl);
-            Gizmos.DrawLine(tl, bl);
+            Vector3 bl = ProjectViewportToY(new Vector3(0f, 0f, 0f), 0f);
+            Vector3 br = ProjectViewportToY(new Vector3(1f, 0f, 0f), 0f);
+            Vector3 tl = ProjectViewportToY(new Vector3(0f, 1f, 0f), 0f);
+            Vector3 tr = ProjectViewportToY(new Vector3(1f, 1f, 0f), 0f);
+
+            if (IsValid(bl))
+            {
+                Gizmos.color = new Color(0.3f, 0.6f, 1f, 0.7f);
+                Gizmos.DrawLine(bl, br); Gizmos.DrawLine(br, tr);
+                Gizmos.DrawLine(tr, tl); Gizmos.DrawLine(tl, bl);
+            }
         }
     }
 
-    private void DrawGroundRect(float minX, float maxX, float minZ, float maxZ, float y)
+    private void DrawRect(float x0, float x1, float z0, float z1, float y)
     {
-        y += 0.05f;
-        Vector3 bl = new Vector3(minX, y, minZ);
-        Vector3 br = new Vector3(maxX, y, minZ);
-        Vector3 tr = new Vector3(maxX, y, maxZ);
-        Vector3 tl = new Vector3(minX, y, maxZ);
-        Gizmos.DrawLine(bl, br);
-        Gizmos.DrawLine(br, tr);
-        Gizmos.DrawLine(tr, tl);
-        Gizmos.DrawLine(tl, bl);
+        Gizmos.DrawLine(new Vector3(x0, y, z0), new Vector3(x1, y, z0));
+        Gizmos.DrawLine(new Vector3(x1, y, z0), new Vector3(x1, y, z1));
+        Gizmos.DrawLine(new Vector3(x1, y, z1), new Vector3(x0, y, z1));
+        Gizmos.DrawLine(new Vector3(x0, y, z1), new Vector3(x0, y, z0));
     }
 }

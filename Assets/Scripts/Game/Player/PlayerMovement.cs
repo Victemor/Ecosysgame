@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Maneja el movimiento del jugador con Rigidbody.
-/// La gravedad la gestiona Unity directamente; el script solo controla
-/// el movimiento horizontal y evita que el personaje rote.
+/// Maneja el movimiento del jugador con Rigidbody no-kinematic.
+/// La gravedad la gestiona Unity. El script solo controla el movimiento
+/// horizontal preservando la velocidad vertical del Rigidbody.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
@@ -28,10 +28,11 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
 
-        // Rigidbody se configura por código para garantizar el comportamiento correcto
-        // sin depender de que el diseñador lo ajuste manualmente en el Inspector.
-        rb.freezeRotation    = true;
-        rb.interpolation     = RigidbodyInterpolation.Interpolate;
+        // NO kinematic: necesita gravedad real para pegarse al suelo
+        rb.isKinematic            = false;
+        rb.useGravity             = true;
+        rb.freezeRotation         = true;
+        rb.interpolation          = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
         moveAction = new InputAction(name: "Move", type: InputActionType.Value);
@@ -58,14 +59,18 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// El movimiento se aplica en FixedUpdate para sincronizarse con el motor de física.
-    /// Se preserva la velocidad Y (gravedad de Rigidbody) y solo se reemplaza la horizontal.
+    /// Solo reemplaza la velocidad horizontal. La Y (gravedad) se preserva
+    /// para que Unity maneje correctamente la caída al suelo.
     /// </summary>
     private void FixedUpdate()
     {
         Vector3 horizontal = CalculateHorizontalMovement();
-        Vector3 newPosition = rb.position + horizontal * Time.fixedDeltaTime;
-        rb.MovePosition(newPosition);
+
+        rb.linearVelocity = new Vector3(
+            horizontal.x,
+            rb.linearVelocity.y, // preservar gravedad
+            horizontal.z
+        );
     }
 
     private Vector3 CalculateHorizontalMovement()
@@ -76,6 +81,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 forward = cameraTransform.forward;
         Vector3 right   = cameraTransform.right;
 
+        // Aplanar al plano XZ para que el movimiento sea siempre horizontal
         forward.y = 0f;
         right.y   = 0f;
 
