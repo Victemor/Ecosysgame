@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6286464262578782854
 Transform:
   m_ObjectHideFlags: 0
@@ -79,6 +79,7 @@ GameObject:
   - component: {fileID: 4605032217287755452}
   - component: {fileID: 7011206017979080736}
   - component: {fileID: -762713961864164778}
+  - component: {fileID: -8180588095422340507}
   m_Layer: 3
   m_Name: RanaSabia
   m_TagString: Untagged
@@ -180,8 +181,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.84830755, y: 0.64904195, z: 0.07027061}
-  m_Center: {x: 0.024854317, y: 0.9281327, z: -0.005419288}
+  m_Size: {x: 0.84830755, y: 0.649042, z: 0.084450625}
+  m_Center: {x: 0.024854317, y: 0.9281328, z: 0.0016707145}
 --- !u!54 &-762713961864164778
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -209,3 +210,21 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &-8180588095422340507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7246367361209086644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f3b2514c7377694cb8e52ad069f9fee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCMovement
+  originPoint: {fileID: 0}
+  patrolPoints: []
+  moveSpeed: 2
+  stoppingDistance: 0.2
+  decisionInterval: 3
+  moveProbability: 0.6

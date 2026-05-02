@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 3311108609005231059}
   - component: {fileID: 8358546396443516277}
   - component: {fileID: 1663659208957525534}
-  - component: {fileID: 5240843711315414353}
   - component: {fileID: 6930740933923952761}
   - component: {fileID: 5976749241725996897}
   m_Layer: 6
@@ -166,31 +165,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 1
   cameraTransform: {fileID: 0}
---- !u!143 &5240843711315414353
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 947056055181794885}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 0.3
-  m_Radius: 0.3
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6930740933923952761
 MonoBehaviour:
   m_ObjectHideFlags: 0

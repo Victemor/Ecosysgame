@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Maneja el movimiento del jugador con Rigidbody no-kinematic.
-/// La gravedad la gestiona Unity. El script solo controla el movimiento
-/// horizontal preservando la velocidad vertical del Rigidbody.
+/// Maneja el movimiento del jugador con Rigidbody puro.
+/// Usa linearVelocity en lugar de MovePosition para que las
+/// colisiones con colliders funcionen correctamente en todas las direcciones.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
@@ -27,8 +27,6 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-
-        // NO kinematic: necesita gravedad real para pegarse al suelo
         rb.isKinematic            = false;
         rb.useGravity             = true;
         rb.freezeRotation         = true;
@@ -59,8 +57,9 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Solo reemplaza la velocidad horizontal. La Y (gravedad) se preserva
-    /// para que Unity maneje correctamente la caída al suelo.
+    /// Reemplaza solo la velocidad horizontal y preserva la Y (gravedad).
+    /// A diferencia de MovePosition, velocity respeta los colliders
+    /// en todas las direcciones correctamente.
     /// </summary>
     private void FixedUpdate()
     {
@@ -68,7 +67,7 @@ public class PlayerMovement : MonoBehaviour
 
         rb.linearVelocity = new Vector3(
             horizontal.x,
-            rb.linearVelocity.y, // preservar gravedad
+            rb.linearVelocity.y,
             horizontal.z
         );
     }
@@ -78,10 +77,9 @@ public class PlayerMovement : MonoBehaviour
         if (inputVector.sqrMagnitude <= 0.01f)
             return Vector3.zero;
 
-        Vector3 forward = cameraTransform.forward;
-        Vector3 right   = cameraTransform.right;
+        Vector3 forward = cameraTransform != null ? cameraTransform.forward : Vector3.forward;
+        Vector3 right   = cameraTransform != null ? cameraTransform.right   : Vector3.right;
 
-        // Aplanar al plano XZ para que el movimiento sea siempre horizontal
         forward.y = 0f;
         right.y   = 0f;
 

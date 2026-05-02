@@ -3,16 +3,15 @@ using UnityEngine;
 
 /// <summary>
 /// Genera objetos del entorno automáticamente:
-/// - En los 4 bordes del suelo (con huecos opcionales en cada lado).
-/// - Distribuidos aleatoriamente en el interior del área.
-/// Toda la configuración es editable desde el Inspector.
-/// La generación puede ejecutarse en Edit Mode desde el Custom Editor.
+/// - Bordes: llenado completo con separación mínima entre objetos.
+/// - Interior: cantidad fija distribuida aleatoriamente.
+/// El tamaño de cada objeto se detecta desde su Collider automáticamente.
 /// </summary>
 public class WorldObjectGenerator : MonoBehaviour
 {
     [Header("Ground Reference")]
 
-    [SerializeField, Tooltip("Renderer del suelo. Se usa para calcular los límites del mundo.")]
+    [SerializeField, Tooltip("Renderer del suelo para calcular los límites del mundo.")]
     private Renderer groundRenderer;
 
     [Header("Objects")]
@@ -22,61 +21,57 @@ public class WorldObjectGenerator : MonoBehaviour
 
     [Header("Boundary Settings")]
 
-    [SerializeField, Tooltip("Separación adicional entre objetos en los bordes.")]
-    private float boundarySpacing = 0.2f;
+    [SerializeField, Tooltip("Gap mínimo entre objetos en los bordes. Valor muy pequeño para que queden casi pegados.")]
+    private float boundaryGap = 0.02f;
 
-    [SerializeField, Tooltip("Configuración del hueco en el borde superior.")]
+    [SerializeField, Tooltip("Hueco opcional en el centro del borde superior.")]
     private BoundaryGapConfig gapTop;
 
-    [SerializeField, Tooltip("Configuración del hueco en el borde inferior.")]
+    [SerializeField, Tooltip("Hueco opcional en el centro del borde inferior.")]
     private BoundaryGapConfig gapBottom;
 
-    [SerializeField, Tooltip("Configuración del hueco en el borde izquierdo.")]
+    [SerializeField, Tooltip("Hueco opcional en el centro del borde izquierdo.")]
     private BoundaryGapConfig gapLeft;
 
-    [SerializeField, Tooltip("Configuración del hueco en el borde derecho.")]
+    [SerializeField, Tooltip("Hueco opcional en el centro del borde derecho.")]
     private BoundaryGapConfig gapRight;
 
     [Header("Interior Settings")]
 
     [SerializeField, Tooltip("Cantidad de objetos a generar en el interior del mapa.")]
-    private int interiorCount = 20;
+    private int interiorCount = 15;
 
-    [SerializeField, Tooltip("Separación mínima entre objetos del interior para evitar solapamientos.")]
+    [SerializeField, Tooltip("Separación mínima entre objetos del interior.")]
     private float minSeparation = 1.5f;
 
-    [SerializeField, Tooltip("Margen desde los bordes del suelo para el área interior válida.")]
+    [SerializeField, Tooltip("Margen desde los bordes para el área interior válida.")]
     private float interiorMargin = 2f;
 
-    [SerializeField, Tooltip("Semilla aleatoria. -1 = aleatoria cada vez.")]
-    private int randomSeed = -1;
+    [Header("Generation")]
 
-    [Header("Container")]
+    [SerializeField, Tooltip("Semilla aleatoria. -1 = diferente cada vez.")]
+    private int randomSeed = 42;
 
-    [SerializeField, Tooltip("Transform padre donde se instancian los objetos. Si es null, se usa este GameObject.")]
+    [SerializeField, Tooltip("Transform padre donde se instancian los objetos generados.")]
     private Transform container;
 
-    // ── Bounds calculados ────────────────────────────────────────────
+    // ── Bounds ───────────────────────────────────────────────────────
 
     private Bounds worldBounds;
 
     // ── API pública ──────────────────────────────────────────────────
 
-    /// <summary>
-    /// Genera todos los objetos del mundo (bordes + interior).
-    /// Si ya existen objetos generados, los elimina primero.
-    /// </summary>
     public void Generate()
     {
         if (groundRenderer == null)
         {
-            Debug.LogError("[WorldObjectGenerator] No hay un Renderer de suelo asignado.", this);
+            Debug.LogError("[WorldObjectGenerator] Asigna un Ground Renderer.", this);
             return;
         }
 
         if (objectEntries == null || objectEntries.Count == 0)
         {
-            Debug.LogWarning("[WorldObjectGenerator] No hay objetos configurados.", this);
+            Debug.LogWarning("[WorldObjectGenerator] No hay objetos en la lista.", this);
             return;
         }
 
@@ -93,18 +88,13 @@ public class WorldObjectGenerator : MonoBehaviour
         GenerateInterior(parent);
     }
 
-    /// <summary>
-    /// Elimina todos los objetos hijos del container generados previamente.
-    /// </summary>
     public void ClearGenerated()
     {
         Transform parent = container != null ? container : transform;
 
-        // Iterar en reversa para destruir correctamente en Edit Mode y Play Mode
         for (int i = parent.childCount - 1; i >= 0; i--)
         {
             GameObject child = parent.GetChild(i).gameObject;
-
 #if UNITY_EDITOR
             UnityEditor.Undo.DestroyObjectImmediate(child);
 #else
@@ -116,67 +106,54 @@ public class WorldObjectGenerator : MonoBehaviour
     // ── Bordes ───────────────────────────────────────────────────────
 
     private void GenerateBoundaries(Transform parent)
-    {
-        float minX = worldBounds.min.x;
-        float maxX = worldBounds.max.x;
-        float minZ = worldBounds.min.z;
-        float maxZ = worldBounds.max.z;
-        float y    = worldBounds.center.y;
+{
+    float minX = worldBounds.min.x;
+    float maxX = worldBounds.max.x;
+    float minZ = worldBounds.min.z;
+    float maxZ = worldBounds.max.z;
+    float y    = worldBounds.center.y;
 
-        // Top: Z = maxZ, recorre en X
-        GenerateBorderLine(
-            start:    new Vector3(minX, y, maxZ),
-            end:      new Vector3(maxX, y, maxZ),
-            axis:     Vector3.right,
-            gap:      gapTop,
-            parent:   parent,
-            useZ:     false
-        );
+    // Superior: se mueve hacia adentro restando en Z
+    FillBorderLine(
+        new Vector3(minX, y, maxZ - gapTop.inwardOffset),
+        new Vector3(maxX, y, maxZ - gapTop.inwardOffset),
+        Vector3.right, false, gapTop, parent);
 
-        // Bottom: Z = minZ, recorre en X
-        GenerateBorderLine(
-            start:    new Vector3(minX, y, minZ),
-            end:      new Vector3(maxX, y, minZ),
-            axis:     Vector3.right,
-            gap:      gapBottom,
-            parent:   parent,
-            useZ:     false
-        );
+    // Inferior: se mueve hacia adentro sumando en Z
+    FillBorderLine(
+        new Vector3(minX, y, minZ + gapBottom.inwardOffset),
+        new Vector3(maxX, y, minZ + gapBottom.inwardOffset),
+        Vector3.right, false, gapBottom, parent);
 
-        // Left: X = minX, recorre en Z
-        GenerateBorderLine(
-            start:    new Vector3(minX, y, minZ),
-            end:      new Vector3(minX, y, maxZ),
-            axis:     Vector3.forward,
-            gap:      gapLeft,
-            parent:   parent,
-            useZ:     true
-        );
+    // Izquierdo: se mueve hacia adentro sumando en X
+    // Las esquinas se recortan para no solapar con top/bottom
+    FillBorderLine(
+        new Vector3(minX + gapLeft.inwardOffset, y, minZ + gapBottom.inwardOffset),
+        new Vector3(minX + gapLeft.inwardOffset, y, maxZ - gapTop.inwardOffset),
+        Vector3.forward, true, gapLeft, parent);
 
-        // Right: X = maxX, recorre en Z
-        GenerateBorderLine(
-            start:    new Vector3(maxX, y, minZ),
-            end:      new Vector3(maxX, y, maxZ),
-            axis:     Vector3.forward,
-            gap:      gapRight,
-            parent:   parent,
-            useZ:     true
-        );
-    }
+    // Derecho: se mueve hacia adentro restando en X
+    // Las esquinas se recortan igual
+    FillBorderLine(
+        new Vector3(maxX - gapRight.inwardOffset, y, minZ + gapBottom.inwardOffset),
+        new Vector3(maxX - gapRight.inwardOffset, y, maxZ - gapTop.inwardOffset),
+        Vector3.forward, true, gapRight, parent);
+}
 
     /// <summary>
-    /// Recorre una línea del borde e instancia objetos con separación uniforme,
-    /// respetando el hueco central si está configurado.
+    /// Llena completamente una línea de borde con objetos.
+    /// El tamaño de cada objeto se detecta de su collider.
+    /// Solo deja hueco si está explícitamente configurado.
     /// </summary>
-    private void GenerateBorderLine(
+    private void FillBorderLine(
         Vector3           start,
         Vector3           end,
         Vector3           axis,
+        bool              useZ,
         BoundaryGapConfig gap,
-        Transform         parent,
-        bool              useZ)
+        Transform         parent)
     {
-        List<WorldObjectEntry> candidates = GetEntriesForPlacement(ObjectPlacementType.BoundariesOnly);
+        List<WorldObjectEntry> candidates = GetCandidates(ObjectPlacementType.BoundariesOnly);
         if (candidates.Count == 0) return;
 
         float lineLength  = Vector3.Distance(start, end);
@@ -184,37 +161,44 @@ public class WorldObjectGenerator : MonoBehaviour
             ? (start.z + end.z) / 2f
             : (start.x + end.x) / 2f;
 
-        WorldObjectEntry entry     = PickWeighted(candidates);
-        float            stepSize  = (useZ ? entry.size.y : entry.size.x) + boundarySpacing;
-        float            travelled = stepSize / 2f;
+        float travelled = 0f;
 
         while (travelled < lineLength)
         {
-            Vector3 pos = start + axis * travelled;
+            WorldObjectEntry entry    = PickWeighted(candidates);
+            Vector2          size     = entry.GetSize();
+            float            objSize  = useZ ? size.y : size.x;
 
-            // Evaluar si esta posición cae dentro del hueco central
-            float posCoord = useZ ? pos.z : pos.x;
+            // Si el tamaño es 0 (sin collider y sin sprite), usar 1 como fallback
+            if (objSize <= 0f) objSize = 1f;
 
-            if (gap.enabled && Mathf.Abs(posCoord - centerCoord) < gap.gapWidth / 2f)
-            {
-                travelled += stepSize;
-                continue;
-            }
+            float halfObj = objSize / 2f;
 
-            InstantiateEntry(PickWeighted(candidates), pos, parent);
-            travelled += stepSize;
+            // Centrar el objeto en su slot
+            float posOnLine = travelled + halfObj;
+
+            if (posOnLine > lineLength) break;
+
+            Vector3 pos = start + axis * posOnLine;
+
+            // Evaluar si cae en el hueco central
+            float coord = useZ ? pos.z : pos.x;
+
+            bool inGap = gap.enabled && Mathf.Abs(coord - centerCoord) < gap.gapWidth / 2f;
+
+            if (!inGap)
+                InstantiateEntry(entry, pos, parent);
+
+            // Avanzar al siguiente slot: tamaño del objeto + gap mínimo
+            travelled += objSize + boundaryGap;
         }
     }
 
     // ── Interior ─────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Distribuye objetos aleatoriamente dentro del área interior del mapa.
-    /// Aplica separación mínima para evitar solapamientos obvios.
-    /// </summary>
     private void GenerateInterior(Transform parent)
     {
-        List<WorldObjectEntry> candidates = GetEntriesForPlacement(ObjectPlacementType.InteriorOnly);
+        List<WorldObjectEntry> candidates = GetCandidates(ObjectPlacementType.InteriorOnly);
         if (candidates.Count == 0) return;
 
         float minX = worldBounds.min.x + interiorMargin;
@@ -223,9 +207,9 @@ public class WorldObjectGenerator : MonoBehaviour
         float maxZ = worldBounds.max.z - interiorMargin;
         float y    = worldBounds.center.y;
 
-        List<Vector3> placed   = new List<Vector3>();
-        int           attempts = 0;
-        int           maxAttempts = interiorCount * 10;
+        List<Vector3> placed      = new List<Vector3>();
+        int           attempts    = 0;
+        int           maxAttempts = interiorCount * 15;
 
         while (placed.Count < interiorCount && attempts < maxAttempts)
         {
@@ -237,8 +221,7 @@ public class WorldObjectGenerator : MonoBehaviour
                 Random.Range(minZ, maxZ)
             );
 
-            if (IsTooClose(candidate, placed))
-                continue;
+            if (IsTooClose(candidate, placed)) continue;
 
             WorldObjectEntry entry = PickWeighted(candidates);
             InstantiateEntry(entry, candidate, parent);
@@ -246,16 +229,13 @@ public class WorldObjectGenerator : MonoBehaviour
         }
 
         if (placed.Count < interiorCount)
-            Debug.LogWarning($"[WorldObjectGenerator] Solo se colocaron {placed.Count}/{interiorCount} objetos interiores. Reduce minSeparation o interiorCount.");
+            Debug.LogWarning($"[WorldObjectGenerator] Solo se colocaron {placed.Count}/{interiorCount} objetos interiores. Reduce minSeparation o interiorCount.", this);
     }
 
     private bool IsTooClose(Vector3 candidate, List<Vector3> placed)
     {
         foreach (Vector3 p in placed)
-        {
-            if (Vector3.Distance(candidate, p) < minSeparation)
-                return true;
-        }
+            if (Vector3.Distance(candidate, p) < minSeparation) return true;
         return false;
     }
 
@@ -267,49 +247,37 @@ public class WorldObjectGenerator : MonoBehaviour
 
 #if UNITY_EDITOR
         GameObject obj = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(entry.prefab, parent);
-        obj.transform.position = position;
+        obj.transform.SetPositionAndRotation(position, Quaternion.identity);
         UnityEditor.Undo.RegisterCreatedObjectUndo(obj, "Generate World Object");
 #else
         Instantiate(entry.prefab, position, Quaternion.identity, parent);
 #endif
     }
 
-    /// <summary>
-    /// Devuelve los objetos que aplican a un tipo de placement dado.
-    /// Los de tipo Both se incluyen en ambos contextos.
-    /// </summary>
-    private List<WorldObjectEntry> GetEntriesForPlacement(ObjectPlacementType type)
+    private List<WorldObjectEntry> GetCandidates(ObjectPlacementType type)
     {
-        List<WorldObjectEntry> result = new List<WorldObjectEntry>();
-
-        foreach (WorldObjectEntry entry in objectEntries)
+        var result = new List<WorldObjectEntry>();
+        foreach (WorldObjectEntry e in objectEntries)
         {
-            if (entry.prefab == null) continue;
-
-            if (entry.placementType == type || entry.placementType == ObjectPlacementType.Both)
-                result.Add(entry);
+            if (e.prefab == null) continue;
+            if (e.placementType == type || e.placementType == ObjectPlacementType.Both)
+                result.Add(e);
         }
-
         return result;
     }
 
-    /// <summary>
-    /// Selecciona un objeto de la lista respetando el peso de cada uno.
-    /// </summary>
     private WorldObjectEntry PickWeighted(List<WorldObjectEntry> entries)
     {
-        int totalWeight = 0;
-        foreach (WorldObjectEntry e in entries)
-            totalWeight += e.weight;
+        int total = 0;
+        foreach (WorldObjectEntry e in entries) total += e.weight;
 
-        int roll = Random.Range(0, totalWeight);
-        int accumulated = 0;
+        int roll = Random.Range(0, total);
+        int acc  = 0;
 
         foreach (WorldObjectEntry e in entries)
         {
-            accumulated += e.weight;
-            if (roll < accumulated)
-                return e;
+            acc += e.weight;
+            if (roll < acc) return e;
         }
 
         return entries[entries.Count - 1];
@@ -323,13 +291,16 @@ public class WorldObjectGenerator : MonoBehaviour
 
         Bounds b = groundRenderer.bounds;
 
-        Gizmos.color = new Color(1f, 0.8f, 0f, 0.4f);
-        Gizmos.DrawWireCube(b.center, b.size);
+        // Amarillo — límites totales del mundo
+        Gizmos.color = new Color(1f, 0.8f, 0f, 0.5f);
+        Gizmos.DrawWireCube(b.center, new Vector3(b.size.x, 0.1f, b.size.z));
 
-        // Área interior válida
-        float margin = interiorMargin;
-        Vector3 innerSize = new Vector3(b.size.x - margin * 2f, 0.1f, b.size.z - margin * 2f);
+        // Verde — área interior válida
         Gizmos.color = new Color(0f, 1f, 0.5f, 0.3f);
-        Gizmos.DrawWireCube(b.center, innerSize);
+        Gizmos.DrawWireCube(b.center, new Vector3(
+            b.size.x - interiorMargin * 2f,
+            0.1f,
+            b.size.z - interiorMargin * 2f
+        ));
     }
 }

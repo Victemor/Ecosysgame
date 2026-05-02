@@ -4,6 +4,7 @@ using UnityEngine;
 /// Sistema de cámara isométrica para mundo plano.
 /// El cuadro azul (viewport proyectado en el suelo) nunca puede
 /// salir del cuadro verde (límites del terreno).
+/// Los límites se pueden definir manualmente o desde un Renderer.
 /// </summary>
 public class CameraSystem : MonoBehaviour
 {
@@ -22,8 +23,20 @@ public class CameraSystem : MonoBehaviour
 
     [Header("World Boundaries")]
 
-    [SerializeField, Tooltip("Renderer del terreno. Define el cuadro verde.")]
+    [SerializeField, Tooltip("Renderer del terreno. Si está asignado, sobreescribe los límites manuales.")]
     private Renderer groundRenderer;
+
+    [SerializeField, Tooltip("Límite mínimo en X.")]
+    private float boundMinX = -10f;
+
+    [SerializeField, Tooltip("Límite máximo en X.")]
+    private float boundMaxX = 10f;
+
+    [SerializeField, Tooltip("Límite mínimo en Z.")]
+    private float boundMinZ = -10f;
+
+    [SerializeField, Tooltip("Límite máximo en Z.")]
+    private float boundMaxZ = 10f;
 
     // ── Estado interno ───────────────────────────────────────────────
 
@@ -32,13 +45,13 @@ public class CameraSystem : MonoBehaviour
 
     /// <summary>
     /// Offsets desde la posición XZ de la cámara hasta cada borde del
-    /// cuadro azul proyectado en el suelo. Son constantes porque la
-    /// rotación de la cámara no cambia nunca.
+    /// cuadro azul proyectado en el suelo. Constantes porque la
+    /// rotación de la cámara no cambia.
     /// </summary>
-    private float offsetLeft;   // negativo: cuánto sobresale el viewport a la izquierda
-    private float offsetRight;  // positivo: cuánto sobresale a la derecha
-    private float offsetBottom; // negativo: cuánto sobresale hacia la cámara (Z-)
-    private float offsetTop;    // positivo: cuánto sobresale lejos de la cámara (Z+)
+    private float offsetLeft;
+    private float offsetRight;
+    private float offsetBottom;
+    private float offsetTop;
 
     private bool offsetsReady;
 
@@ -94,10 +107,10 @@ public class CameraSystem : MonoBehaviour
             return;
         }
 
-        offsetLeft   = left.x   - camPos.x;  // negativo
-        offsetRight  = right.x  - camPos.x;  // positivo
-        offsetBottom = bottom.z - camPos.z;   // negativo
-        offsetTop    = top.z    - camPos.z;   // positivo
+        offsetLeft   = left.x   - camPos.x;
+        offsetRight  = right.x  - camPos.x;
+        offsetBottom = bottom.z - camPos.z;
+        offsetTop    = top.z    - camPos.z;
 
         offsetsReady = true;
     }
@@ -121,28 +134,26 @@ public class CameraSystem : MonoBehaviour
     /// <summary>
     /// Clampea la posición de la cámara para que los BORDES del cuadro azul
     /// no salgan del cuadro verde.
-    ///
-    /// Razonamiento:
-    /// - Borde izquierdo del azul = camPos.x + offsetLeft
-    /// - Para que no salga del verde: camPos.x + offsetLeft >= greenMinX
-    /// - Despejando: camPos.x >= greenMinX - offsetLeft
-    ///
-    /// Lo mismo para los otros tres lados.
+    /// Si hay groundRenderer, sus bounds sobreescriben los límites manuales.
     /// </summary>
     private Vector3 ClampByViewportEdges(Vector3 pos)
     {
-        if (groundRenderer == null) return pos;
+        if (groundRenderer != null)
+        {
+            Bounds b = groundRenderer.bounds;
+            boundMinX = b.min.x;
+            boundMaxX = b.max.x;
+            boundMinZ = b.min.z;
+            boundMaxZ = b.max.z;
+        }
 
-        Bounds b = groundRenderer.bounds;
+        float clampMinX = boundMinX - offsetLeft;
+        float clampMaxX = boundMaxX - offsetRight;
+        float clampMinZ = boundMinZ - offsetBottom;
+        float clampMaxZ = boundMaxZ - offsetTop;
 
-        float clampMinX = b.min.x - offsetLeft;    // borde izq azul no sale por izq verde
-        float clampMaxX = b.max.x - offsetRight;   // borde der azul no sale por der verde
-        float clampMinZ = b.min.z - offsetBottom;  // borde inf azul no sale por inf verde
-        float clampMaxZ = b.max.z - offsetTop;     // borde sup azul no sale por sup verde
-
-        // Si el terreno es más pequeño que el viewport, centrar la cámara
-        if (clampMinX > clampMaxX) { float cx = (b.min.x + b.max.x) / 2f; clampMinX = cx; clampMaxX = cx; }
-        if (clampMinZ > clampMaxZ) { float cz = (b.min.z + b.max.z) / 2f; clampMinZ = cz; clampMaxZ = cz; }
+        if (clampMinX > clampMaxX) { float cx = (boundMinX + boundMaxX) / 2f; clampMinX = cx; clampMaxX = cx; }
+        if (clampMinZ > clampMaxZ) { float cz = (boundMinZ + boundMaxZ) / 2f; clampMinZ = cz; clampMaxZ = cz; }
 
         return new Vector3(
             Mathf.Clamp(pos.x, clampMinX, clampMaxX),
@@ -184,7 +195,9 @@ public class CameraSystem : MonoBehaviour
         currentVelocity = Vector3.zero;
 
         for (int i = 0; i < 3; i++)
-            transform.position = ClampByViewportEdges(CalculateCameraPosition());
+            transform.position = offsetsReady
+                ? ClampByViewportEdges(CalculateCameraPosition())
+                : CalculateCameraPosition();
     }
 
     public void SetTarget(Transform newTarget) => target = newTarget;
@@ -196,15 +209,18 @@ public class CameraSystem : MonoBehaviour
         if (cam == null) cam = GetComponent<Camera>();
         CalculateViewportOffsets();
 
-        // Verde — terreno (cuadro verde)
+        // Verde — cuadro verde (renderer o manual)
         if (groundRenderer != null)
         {
             Bounds b = groundRenderer.bounds;
-            Gizmos.color = new Color(0f, 1f, 0.3f, 0.6f);
-            DrawRect(b.min.x, b.max.x, b.min.z, b.max.z, 0.05f);
+            boundMinX = b.min.x; boundMaxX = b.max.x;
+            boundMinZ = b.min.z; boundMaxZ = b.max.z;
         }
 
-        // Azul — viewport proyectado en el suelo (cuadro azul)
+        Gizmos.color = new Color(0f, 1f, 0.3f, 0.6f);
+        DrawRect(boundMinX, boundMaxX, boundMinZ, boundMaxZ, 0.05f);
+
+        // Azul — viewport proyectado en el suelo
         if (cam != null)
         {
             Vector3 bl = ProjectViewportToY(new Vector3(0f, 0f, 0f), 0f);

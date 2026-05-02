@@ -235,8 +235,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.28, y: 1.28, z: 0.2}
-  m_Center: {x: 0, y: 0.64, z: 0}
+  m_Size: {x: 0.27055627, y: 0.30086708, z: 0.091654815}
+  m_Center: {x: 0.0289613, y: 0.15043354, z: 0.0541726}
 --- !u!212 &177518932
 SpriteRenderer:
   serializedVersion: 2
@@ -690,11 +690,11 @@ MonoBehaviour:
   target: {fileID: 177518933}
   useSmoothing: 0
   smoothSpeed: 5
-  useBoundaries: 1
-  boundMinX: -9.15
-  boundMaxX: 9.1
-  boundMinZ: -5.54
-  boundMaxZ: 4.41
+  groundRenderer: {fileID: 0}
+  boundMinX: -8.72
+  boundMaxX: 8.4
+  boundMinZ: -5.15
+  boundMaxZ: 3.83
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
