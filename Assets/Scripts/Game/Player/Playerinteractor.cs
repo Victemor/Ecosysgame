@@ -50,6 +50,7 @@ public class PlayerInteractor : MonoBehaviour
     private void Update()
     {
         DetectTarget();
+
     }
 
     /// <summary>
@@ -100,11 +101,15 @@ public class PlayerInteractor : MonoBehaviour
     /// </summary>
     private void TryInteract()
     {
-        if (currentTarget == null)
-            return;
+        if (currentTarget == null) return;
+
+        Debug.Log($"[PlayerInteractor] Estado actual: {GameManager.Instance.CurrentState}");
 
         if (GameManager.Instance.CurrentState != GameState.Gameplay)
+        {
+            Debug.LogWarning("[PlayerInteractor] Bloqueado: el estado no es Gameplay.");
             return;
+        }
 
         currentTarget.Interact();
     }

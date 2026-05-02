@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 598010848ae8fc343b817bd963e86c56, type: 3}
   m_Name: Talk
   m_EditorClassIdentifier: Assembly-CSharp::InteractableData
-  id: 
-  displayName: 
-  description: 
+  id: rana
+  displayName: rana
+  description: ranatalk
   icon: {fileID: 21300000, guid: 308b4fecc8fcc094cab570305e57af20, type: 3}
   interactionType: 2
   triggersDialogue: 1
-  dialogueData: {fileID: 0}
+  dialogueData: {fileID: 11400000, guid: c45a465820dbeb941b46e0caa458efba, type: 2}
   triggersClimateEvent: 0
   climateEventData: {fileID: 0}

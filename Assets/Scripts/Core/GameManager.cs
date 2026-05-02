@@ -55,6 +55,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         SetState(GameState.Boot);
+        SetState(GameState.Gameplay);
     }
 
     /// <summary>
