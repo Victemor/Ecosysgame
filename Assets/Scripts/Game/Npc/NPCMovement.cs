@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Controla el movimiento autónomo del NPC entre puntos de patrulla.
-/// Aplica gravedad para mantener al NPC en terrenos con desniveles,
-/// consistente con el comportamiento de PlayerMovement.
+/// Controla el movimiento autónomo del NPC con Rigidbody.
+/// La gravedad la gestiona Unity; el script solo mueve horizontalmente
+/// mediante velocity para no interferir con la física vertical.
 /// </summary>
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Rigidbody))]
 public class NPCMovement : MonoBehaviour
 {
     [Header("Points")]
@@ -15,7 +15,7 @@ public class NPCMovement : MonoBehaviour
     [SerializeField, Tooltip("Punto de origen al que el NPC regresa tras patrullar.")]
     private Transform originPoint;
 
-    [SerializeField, Tooltip("Lista de puntos de patrulla a los que puede desplazarse.")]
+    [SerializeField, Tooltip("Lista de puntos de patrulla.")]
     private List<Transform> patrolPoints;
 
     [Header("Movement")]
@@ -23,34 +23,32 @@ public class NPCMovement : MonoBehaviour
     [SerializeField, Tooltip("Velocidad de desplazamiento horizontal en unidades/segundo.")]
     private float moveSpeed = 2f;
 
-    [SerializeField, Tooltip("Distancia mínima al destino para considerar que llegó.")]
-    private float stoppingDistance = 0.1f;
-
-    [Header("Gravity")]
-
-    [SerializeField, Tooltip("Escala de gravedad aplicada al NPC. Ajusta si flota o cae demasiado rápido.")]
-    private float gravityScale = 1f;
+    [SerializeField, Tooltip("Distancia horizontal mínima para considerar que llegó al destino.")]
+    private float stoppingDistance = 0.2f;
 
     [Header("Behavior")]
 
     [SerializeField, Tooltip("Tiempo en segundos entre decisiones de movimiento.")]
     private float decisionInterval = 3f;
 
-    [SerializeField, Tooltip("Probabilidad de moverse al siguiente ciclo de decisión (0 = nunca, 1 = siempre).")]
+    [SerializeField, Tooltip("Probabilidad de moverse en cada ciclo (0 = nunca, 1 = siempre).")]
     private float moveProbability = 0.6f;
 
-    private CharacterController controller;
-    private bool   isMoving;
-    private float  verticalVelocity;
+    private Rigidbody rb;
+    private bool isMoving;
 
     /// <summary>
-    /// Dirección 2D de movimiento actual. Leída por NPCSpriteAnimator para animación.
+    /// Dirección 2D de movimiento actual. Leída por NPCSpriteAnimator.
     /// </summary>
     public Vector2 MovementDirection { get; private set; }
 
     private void Awake()
     {
-        controller = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody>();
+
+        rb.freezeRotation         = true;
+        rb.interpolation          = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
     }
 
     private void Start()
@@ -58,115 +56,75 @@ public class NPCMovement : MonoBehaviour
         StartCoroutine(BehaviorLoop());
     }
 
-    /// <summary>
-    /// Loop principal de comportamiento. Decide periódicamente si el NPC se mueve.
-    /// </summary>
     private IEnumerator BehaviorLoop()
     {
         while (true)
         {
             yield return new WaitForSeconds(decisionInterval);
 
-            if (isMoving)
-                continue;
+            if (isMoving) continue;
 
             if (Random.value <= moveProbability)
                 StartCoroutine(MoveRoutine());
         }
     }
 
-    /// <summary>
-    /// Rutina completa de movimiento: va a un punto aleatorio y regresa al origen.
-    /// </summary>
     private IEnumerator MoveRoutine()
     {
         isMoving = true;
 
         Transform target = GetRandomPoint();
-
         yield return MoveTo(target);
+
         yield return new WaitForSeconds(1f);
         yield return MoveTo(originPoint);
 
         isMoving          = false;
         MovementDirection = Vector2.zero;
+
+        // Detener movimiento horizontal al terminar
+        rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
     }
 
     /// <summary>
-    /// Mueve el NPC hacia un Transform destino aplicando gravedad en cada frame.
+    /// Mueve el NPC hacia el destino frame a frame comparando solo distancia horizontal.
+    /// La velocidad Y del Rigidbody no se toca para respetar la gravedad de Unity.
     /// </summary>
     private IEnumerator MoveTo(Transform target)
     {
-        while (Vector3.Distance(transform.position, target.position) > stoppingDistance)
+        while (true)
         {
-            Vector3 direction = (target.position - transform.position).normalized;
+            Vector3 selfFlat   = new Vector3(transform.position.x, 0f, transform.position.z);
+            Vector3 targetFlat = new Vector3(target.position.x,    0f, target.position.z);
 
-            // Exponer dirección horizontal para el animador
+            if (Vector3.Distance(selfFlat, targetFlat) <= stoppingDistance)
+                break;
+
+            Vector3 direction = (targetFlat - selfFlat).normalized;
             MovementDirection = new Vector2(direction.x, direction.z);
 
-            ApplyGravity();
+            Vector3 newPosition = rb.position + direction * moveSpeed * Time.fixedDeltaTime;
+            rb.MovePosition(newPosition);
 
-            Vector3 horizontalMove = direction * moveSpeed * Time.deltaTime;
-            horizontalMove.y = verticalVelocity * Time.deltaTime;
-
-            CollisionFlags flags = controller.Move(horizontalMove);
-
-            // Si chocó lateralmente, esperar un frame antes de continuar
-            if ((flags & CollisionFlags.Sides) != 0)
-            {
-                yield return null;
-                continue;
-            }
-
-            yield return null;
-        }
-
-        // Asegurar velocidad vertical limpia al llegar al destino
-        if (controller.isGrounded)
-            verticalVelocity = -2f;
-    }
-
-    /// <summary>
-    /// Acumula velocidad vertical cuando el NPC está en el aire.
-    /// Resetea a un valor negativo pequeño al tocar el suelo para pegarlo al terreno.
-    /// Espeja la lógica de PlayerMovement para consistencia entre personajes.
-    /// </summary>
-    private void ApplyGravity()
-    {
-        if (controller.isGrounded && verticalVelocity < 0f)
-        {
-            verticalVelocity = -2f;
-        }
-        else
-        {
-            verticalVelocity += Physics.gravity.y * gravityScale * Time.deltaTime;
+            yield return new WaitForFixedUpdate();
         }
     }
 
-    /// <summary>
-    /// Devuelve un punto de patrulla aleatorio, o el origen si la lista está vacía.
-    /// </summary>
     private Transform GetRandomPoint()
     {
         if (patrolPoints == null || patrolPoints.Count == 0)
             return originPoint;
 
-        int index = Random.Range(0, patrolPoints.Count);
-        return patrolPoints[index];
+        return patrolPoints[Random.Range(0, patrolPoints.Count)];
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (patrolPoints == null)
-            return;
+        if (patrolPoints == null) return;
 
         Gizmos.color = Color.cyan;
-
         foreach (Transform point in patrolPoints)
-        {
-            if (point != null)
-                Gizmos.DrawWireSphere(point.position, 0.2f);
-        }
+            if (point != null) Gizmos.DrawWireSphere(point.position, 0.2f);
 
         if (originPoint != null)
         {

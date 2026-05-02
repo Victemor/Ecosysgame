@@ -57,26 +57,27 @@ public class GameStateController : MonoBehaviour
     {
         validTransitions = new Dictionary<GameState, List<GameState>>
         {
-            { GameState.Boot, new List<GameState> { GameState.MainMenu } },
+            // Agrega Gameplay como destino válido desde Boot
+            { GameState.Boot, new List<GameState> { GameState.MainMenu, GameState.Gameplay } },
 
-            { GameState.MainMenu, new List<GameState> 
-                { GameState.Gameplay, GameState.Transition } 
+            { GameState.MainMenu, new List<GameState>
+                { GameState.Gameplay, GameState.Transition }
             },
 
-            { GameState.Gameplay, new List<GameState> 
-                { GameState.Dialogue, GameState.Paused, GameState.Transition } 
+            { GameState.Gameplay, new List<GameState>
+                { GameState.Dialogue, GameState.Paused, GameState.Transition }
             },
 
-            { GameState.Dialogue, new List<GameState> 
-                { GameState.Gameplay } 
+            { GameState.Dialogue, new List<GameState>
+                { GameState.Gameplay }
             },
 
-            { GameState.Paused, new List<GameState> 
-                { GameState.Gameplay, GameState.MainMenu } 
+            { GameState.Paused, new List<GameState>
+                { GameState.Gameplay, GameState.MainMenu }
             },
 
-            { GameState.Transition, new List<GameState> 
-                { GameState.Gameplay, GameState.MainMenu } 
+            { GameState.Transition, new List<GameState>
+                { GameState.Gameplay, GameState.MainMenu }
             }
         };
     }

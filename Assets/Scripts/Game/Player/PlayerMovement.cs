@@ -2,49 +2,39 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Maneja el movimiento del jugador usando Input System configurado por código.
-/// Incluye gravedad para terrenos inclinados o con desniveles.
+/// Maneja el movimiento del jugador con Rigidbody.
+/// La gravedad la gestiona Unity directamente; el script solo controla
+/// el movimiento horizontal y evita que el personaje rote.
 /// </summary>
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
 
-    [SerializeField, Tooltip("Velocidad de movimiento horizontal.")]
+    [SerializeField, Tooltip("Velocidad de movimiento horizontal en unidades/segundo.")]
     private float moveSpeed = 5f;
 
     [SerializeField, Tooltip("Referencia a la cámara para calcular dirección relativa.")]
     private Transform cameraTransform;
 
-    [Header("Gravity")]
-
-    [SerializeField, Tooltip("Fuerza de gravedad aplicada al jugador. Usa el valor de Physics.gravity.y por defecto.")]
-    private float gravityScale = 1f;
-
-    private CharacterController characterController;
+    private Rigidbody rb;
     private InputAction moveAction;
-
     private Vector2 inputVector;
-    private float verticalVelocity;
 
-    /// <summary>
-    /// Input actual expuesto para otros sistemas (animación, interacción).
-    /// </summary>
     public Vector2 CurrentInput => inputVector;
-
-    /// <summary>
-    /// Indica si el jugador está actualmente en movimiento.
-    /// </summary>
-    public bool IsMoving => inputVector.sqrMagnitude > 0.01f;
+    public bool IsMoving        => inputVector.sqrMagnitude > 0.01f;
 
     private void Awake()
     {
-        characterController = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody>();
 
-        moveAction = new InputAction(
-            name: "Move",
-            type: InputActionType.Value
-        );
+        // Rigidbody se configura por código para garantizar el comportamiento correcto
+        // sin depender de que el diseñador lo ajuste manualmente en el Inspector.
+        rb.freezeRotation    = true;
+        rb.interpolation     = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+        moveAction = new InputAction(name: "Move", type: InputActionType.Value);
 
         moveAction.AddCompositeBinding("2DVector")
             .With("Up",    "<Keyboard>/w")
@@ -64,59 +54,34 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        ReadInput();
-        ApplyGravity();
-        HandleMovement();
-    }
-
-    /// <summary>
-    /// Lee el vector de input normalizado.
-    /// </summary>
-    private void ReadInput()
-    {
         inputVector = moveAction.ReadValue<Vector2>().normalized;
     }
 
     /// <summary>
-    /// Acumula velocidad vertical cuando el jugador está en el aire.
-    /// Resetea al tocar el suelo para evitar acumulación infinita.
+    /// El movimiento se aplica en FixedUpdate para sincronizarse con el motor de física.
+    /// Se preserva la velocidad Y (gravedad de Rigidbody) y solo se reemplaza la horizontal.
     /// </summary>
-    private void ApplyGravity()
+    private void FixedUpdate()
     {
-        if (characterController.isGrounded && verticalVelocity < 0f)
-        {
-            // Pequeño valor negativo constante para mantener el jugador pegado a rampas
-            verticalVelocity = -2f;
-        }
-        else
-        {
-            verticalVelocity += Physics.gravity.y * gravityScale * Time.deltaTime;
-        }
+        Vector3 horizontal = CalculateHorizontalMovement();
+        Vector3 newPosition = rb.position + horizontal * Time.fixedDeltaTime;
+        rb.MovePosition(newPosition);
     }
 
-    /// <summary>
-    /// Aplica movimiento horizontal relativo a la cámara + velocidad vertical acumulada.
-    /// </summary>
-    private void HandleMovement()
+    private Vector3 CalculateHorizontalMovement()
     {
-        Vector3 moveDirection = Vector3.zero;
+        if (inputVector.sqrMagnitude <= 0.01f)
+            return Vector3.zero;
 
-        if (inputVector.sqrMagnitude > 0.01f)
-        {
-            Vector3 forward = cameraTransform.forward;
-            Vector3 right   = cameraTransform.right;
+        Vector3 forward = cameraTransform.forward;
+        Vector3 right   = cameraTransform.right;
 
-            forward.y = 0f;
-            right.y   = 0f;
+        forward.y = 0f;
+        right.y   = 0f;
 
-            forward.Normalize();
-            right.Normalize();
+        forward.Normalize();
+        right.Normalize();
 
-            moveDirection = forward * inputVector.y + right * inputVector.x;
-        }
-
-        moveDirection.y = verticalVelocity;
-
-        characterController.Move(moveDirection * moveSpeed * Time.deltaTime);
+        return (forward * inputVector.y + right * inputVector.x) * moveSpeed;
     }
 }
