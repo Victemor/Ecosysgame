@@ -1,0 +1,18 @@
+using System;
+
+/// <summary>
+/// Contenedor de datos de progreso del jugador.
+/// Serializable para guardado en JSON.
+/// </summary>
+[Serializable]
+public class GameProgress
+{
+    /// <summary>Tiempo total jugado en segundos.</summary>
+    public float tiempoJugadoSegundos;
+
+    /// <summary>Ecopuntos acumulados del jugador.</summary>
+    public int ecopuntos;
+
+    /// <summary>Progreso total del juego (0-100).</summary>
+    public float progresoTotal;
+}

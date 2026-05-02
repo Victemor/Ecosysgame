@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// Maneja el valor de vida del jugador y notifica cambios a la UI.
-/// No conoce la representación visual: solo gestiona el número y dispara eventos.
+/// Si se cura estando al máximo de vida, otorga 25 monedas por fragmento.
 /// </summary>
 public class PlayerHealth : MonoBehaviour
 {
@@ -12,24 +12,19 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField, Tooltip("Vida máxima. Debe ser múltiplo de 3 (un fragmento por corazón).")]
     private int vidaMax = 9;
 
-    /// <summary>
-    /// Vida actual del jugador. Solo se modifica a través de TakeDamage/Heal.
-    /// </summary>
+    [SerializeField, Tooltip("Monedas que otorga curar un fragmento cuando la vida ya está al máximo.")]
+    private int monedasPorCuracionExtra = 25;
+
+    /// <summary>Vida actual del jugador.</summary>
     public int VidaActual { get; private set; }
 
-    /// <summary>
-    /// Vida máxima configurada.
-    /// </summary>
+    /// <summary>Vida máxima configurada.</summary>
     public int VidaMax => vidaMax;
 
-    /// <summary>
-    /// Se dispara cada vez que la vida cambia. La UI se suscribe aquí.
-    /// </summary>
+    /// <summary>Se dispara cada vez que la vida cambia.</summary>
     public event Action<int> OnVidaChanged;
 
-    /// <summary>
-    /// Se dispara cuando la vida llega a 0.
-    /// </summary>
+    /// <summary>Se dispara cuando la vida llega a 0.</summary>
     public event Action OnMuerte;
 
     private void Awake()
@@ -55,10 +50,19 @@ public class PlayerHealth : MonoBehaviour
 
     /// <summary>
     /// Recupera vida del jugador sin superar el máximo.
+    /// Si ya estaba al máximo, otorga monedas en lugar de curar.
     /// </summary>
     public void Heal(int cantidad)
     {
         if (cantidad <= 0) return;
+
+        bool estabaLleno = VidaActual >= vidaMax;
+
+        if (estabaLleno)
+        {
+            CurrencyManager.Instance?.Add(monedasPorCuracionExtra);
+            return;
+        }
 
         VidaActual = Mathf.Min(vidaMax, VidaActual + cantidad);
         OnVidaChanged?.Invoke(VidaActual);
