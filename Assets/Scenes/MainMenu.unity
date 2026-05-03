@@ -350,7 +350,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HoverSpriteSwap
   spriteNormal: {fileID: 21300000, guid: a16980993501ff4409534525e116c9ee, type: 3}
-  spriteHover: {fileID: 21300000, guid: a16980993501ff4409534525e116c9ee, type: 3}
+  spriteHover: {fileID: 0}
   hoverScale: 1.12
   scaleDuration: 0.15
 --- !u!114 &16715448
@@ -1761,6 +1761,7 @@ GameObject:
   - component: {fileID: 683466807}
   - component: {fileID: 683466806}
   - component: {fileID: 683466805}
+  - component: {fileID: 683466808}
   m_Layer: 0
   m_Name: Cerrar
   m_TagString: Untagged
@@ -1881,6 +1882,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 683466803}
   m_CullTransparentMesh: 1
+--- !u!114 &683466808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 683466803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dbe43341fedb6143862f395b427b1cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoverSpriteSwap
+  spriteNormal: {fileID: 21300000, guid: 879053fed50a9db4292105a353ed9cef, type: 3}
+  spriteHover: {fileID: 0}
+  hoverScale: 1.12
+  scaleDuration: 0.15
 --- !u!1 &720061463
 GameObject:
   m_ObjectHideFlags: 0
@@ -2451,6 +2468,7 @@ GameObject:
   - component: {fileID: 1157849726}
   - component: {fileID: 1157849725}
   - component: {fileID: 1157849724}
+  - component: {fileID: 1157849727}
   m_Layer: 0
   m_Name: Cerrar
   m_TagString: Untagged
@@ -2571,6 +2589,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1157849722}
   m_CullTransparentMesh: 1
+--- !u!114 &1157849727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1157849722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dbe43341fedb6143862f395b427b1cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoverSpriteSwap
+  spriteNormal: {fileID: 21300000, guid: 879053fed50a9db4292105a353ed9cef, type: 3}
+  spriteHover: {fileID: 0}
+  hoverScale: 1.12
+  scaleDuration: 0.15
 --- !u!1 &1318107370
 GameObject:
   m_ObjectHideFlags: 0
@@ -3354,6 +3388,7 @@ GameObject:
   - component: {fileID: 1817559102}
   - component: {fileID: 1817559101}
   - component: {fileID: 1817559100}
+  - component: {fileID: 1817559103}
   m_Layer: 0
   m_Name: Cerrar
   m_TagString: Untagged
@@ -3474,6 +3509,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1817559098}
   m_CullTransparentMesh: 1
+--- !u!114 &1817559103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1817559098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dbe43341fedb6143862f395b427b1cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoverSpriteSwap
+  spriteNormal: {fileID: 21300000, guid: 879053fed50a9db4292105a353ed9cef, type: 3}
+  spriteHover: {fileID: 0}
+  hoverScale: 1.12
+  scaleDuration: 0.15
 --- !u!1 &1891907392
 GameObject:
   m_ObjectHideFlags: 0
@@ -3564,7 +3615,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HoverSpriteSwap
   spriteNormal: {fileID: 21300000, guid: 3bcdac481c621a04dae6529bf4011717, type: 3}
-  spriteHover: {fileID: 21300000, guid: 3bcdac481c621a04dae6529bf4011717, type: 3}
+  spriteHover: {fileID: 0}
   hoverScale: 1.12
   scaleDuration: 0.15
 --- !u!114 &1891907397

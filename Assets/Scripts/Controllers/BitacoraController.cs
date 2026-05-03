@@ -1,3 +1,4 @@
+// BitacoraController.cs
 using System.Collections;
 using DG.Tweening;
 using TMPro;
@@ -7,6 +8,7 @@ using UnityEngine.UI;
 /// <summary>
 /// Controla la bitácora: navegación entre páginas con animación de sprites
 /// y transición de contenido con DOTween (scale out → animación → scale in).
+/// Vive en GameplayManagers (siempre activo), no dentro del panel.
 /// </summary>
 public class BitacoraController : MonoBehaviour
 {
@@ -42,15 +44,15 @@ public class BitacoraController : MonoBehaviour
 
     [Header("Animación de sprites")]
 
-    [SerializeField, Tooltip("Componente que reproduce la secuencia de sprites.")]
+    [SerializeField, Tooltip("Componente que reproduce la secuencia de sprites al pasar página.")]
     private SpriteSequenceAnimator spriteAnimator;
 
     [Header("DOTween Settings")]
 
-    [SerializeField, Tooltip("Duración del scale out.")]
+    [SerializeField, Tooltip("Duración del scale out al cambiar página.")]
     private float scaleOutDuration = 0.2f;
 
-    [SerializeField, Tooltip("Duración del scale in.")]
+    [SerializeField, Tooltip("Duración del scale in al cambiar página.")]
     private float scaleInDuration = 0.25f;
 
     [SerializeField, Tooltip("Overshoot del scale in.")]
@@ -58,13 +60,14 @@ public class BitacoraController : MonoBehaviour
 
     [Header("Referencias")]
 
-    [SerializeField, Tooltip("Referencia al GameplayUIManager.")]
+    [SerializeField, Tooltip("Referencia al GameplayUIManager. Se busca automáticamente si está vacío.")]
     private GameplayUIManager gameplayUIManager;
 
     // ── Estado interno ───────────────────────────────────────────────
 
     private int  paginaActual;
     private bool isAnimating;
+    private Coroutine paginaRoutine;
 
     // ── Unity lifecycle ──────────────────────────────────────────────
 
@@ -72,40 +75,76 @@ public class BitacoraController : MonoBehaviour
     {
         if (gameplayUIManager == null)
             gameplayUIManager = FindFirstObjectByType<GameplayUIManager>();
+
+        if (gameplayUIManager == null)
+            Debug.LogError("[BitacoraController] GameplayUIManager no encontrado.", this);
     }
 
+    /// <summary>
+    /// Este OnEnable corre al activarse GameplayManagers (inicio de escena),
+    /// NO al abrir el panel. Por eso la inicialización de página se hace
+    /// aquí para tener los datos listos cuando el panel aparezca.
+    /// </summary>
     private void OnEnable()
     {
-        isAnimating  = false; // Resetear siempre al abrir
-        paginaActual = paginaInicial;
-        StartCoroutine(InitDelayed());
+        ResetState();
     }
 
-    private IEnumerator InitDelayed()
+    // ── API pública ──────────────────────────────────────────────────
+
+    /// <summary>
+    /// Reinicia la bitácora a la página inicial.
+    /// Llamar desde GameplayUIManager al abrir el panel si se necesita reset.
+    /// </summary>
+    public void ResetState()
     {
-        yield return null;
+        // Cancelar cualquier animación en curso antes de resetear
+        if (paginaRoutine != null)
+        {
+            StopCoroutine(paginaRoutine);
+            paginaRoutine = null;
+        }
+
+        isAnimating  = false;
+        paginaActual = paginaInicial;
         MostrarPaginaInstante(paginaActual);
     }
-
-    // ── Navegación ───────────────────────────────────────────────────
 
     public void IrPaginaAnterior()
     {
         if (isAnimating || paginas == null || paginas.Length == 0) return;
         int nuevaPagina = (paginaActual - 1 + paginas.Length) % paginas.Length;
-        StartCoroutine(CambiarPaginaRoutine(nuevaPagina, isLeft: true));
+        paginaRoutine = StartCoroutine(CambiarPaginaRoutine(nuevaPagina, isLeft: true));
     }
 
     public void IrPaginaSiguiente()
     {
         if (isAnimating || paginas == null || paginas.Length == 0) return;
         int nuevaPagina = (paginaActual + 1) % paginas.Length;
-        StartCoroutine(CambiarPaginaRoutine(nuevaPagina, isLeft: false));
+        paginaRoutine = StartCoroutine(CambiarPaginaRoutine(nuevaPagina, isLeft: false));
     }
 
+    /// <summary>
+    /// Cierra la bitácora. El cierre NUNCA se bloquea por isAnimating:
+    /// se cancela la animación en curso y se delega el cierre al manager.
+    /// </summary>
     public void CerrarBitacora()
     {
-        if (isAnimating) return;
+        // Cancelar animación de página en curso si la hay
+        if (paginaRoutine != null)
+        {
+            StopCoroutine(paginaRoutine);
+            paginaRoutine = null;
+        }
+
+        isAnimating = false;
+
+        // Restaurar escala del contenido por si quedó en 0 (scale out sin completar)
+        if (contenidoContainer != null)
+        {
+            contenidoContainer.DOKill();
+            contenidoContainer.localScale = contenidoTargetScale;
+        }
 
         if (gameplayUIManager != null)
         {
@@ -113,6 +152,7 @@ public class BitacoraController : MonoBehaviour
             return;
         }
 
+        // Fallback: buscar el PanelAnimator padre directamente
         PanelAnimator panelAnimator = GetComponentInParent<PanelAnimator>();
         if (panelAnimator != null)
         {
@@ -120,30 +160,28 @@ public class BitacoraController : MonoBehaviour
             return;
         }
 
+        Debug.LogWarning("[BitacoraController] No se encontró GameplayUIManager ni PanelAnimator padre.", this);
         gameObject.SetActive(false);
     }
 
-    // ── Flujo de cambio de página ────────────────────────────────────
+    // ── Cambio de página ─────────────────────────────────────────────
 
     /// <summary>
-    /// Usa WaitForSecondsRealtime en lugar de WaitUntil para garantizar
-    /// que la coroutine avance aunque Time.timeScale sea 0.
+    /// Usa WaitForSecondsRealtime para funcionar con Time.timeScale en 0.
     /// </summary>
     private IEnumerator CambiarPaginaRoutine(int nuevaPagina, bool isLeft)
     {
         isAnimating = true;
 
-        // 1. Scale out — espera duración real
+        // 1. Scale out
         ScaleOut();
         yield return new WaitForSecondsRealtime(scaleOutDuration);
 
-        // 2. Animación de sprites
+        // 2. Animación de sprites (con timeout de seguridad)
         if (spriteAnimator != null)
         {
-            if (isLeft)
-                spriteAnimator.PlayAnimationA();
-            else
-                spriteAnimator.PlayAnimationB();
+            if (isLeft) spriteAnimator.PlayAnimationA();
+            else        spriteAnimator.PlayAnimationB();
 
             float timeout = 5f;
             float elapsed = 0f;
@@ -155,27 +193,23 @@ public class BitacoraController : MonoBehaviour
             }
         }
 
-        // 3. Actualizar índice y datos
+        // 3. Datos de la nueva página
         paginaActual = nuevaPagina;
         CargarDatosPagina(paginaActual);
 
-        // 4. Scale in — espera duración real
+        // 4. Scale in
         ScaleIn();
         yield return new WaitForSecondsRealtime(scaleInDuration);
 
-        isAnimating = false;
+        isAnimating   = false;
+        paginaRoutine = null;
     }
 
     // ── DOTween ──────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Scale out sin coroutine — dispara la animación y retorna inmediatamente.
-    /// El caller espera con WaitForSecondsRealtime.
-    /// </summary>
     private void ScaleOut()
     {
         if (contenidoContainer == null) return;
-
         contenidoContainer.DOKill();
         contenidoContainer
             .DOScale(Vector3.zero, scaleOutDuration)
@@ -186,7 +220,6 @@ public class BitacoraController : MonoBehaviour
     private void ScaleIn()
     {
         if (contenidoContainer == null) return;
-
         contenidoContainer.localScale = Vector3.zero;
 
         DOTween.Sequence()
@@ -218,7 +251,6 @@ public class BitacoraController : MonoBehaviour
         }
 
         indice = Mathf.Clamp(indice, 0, paginas.Length - 1);
-
         BitacoraPageData pagina = paginas[indice];
 
         if (pagina == null)
@@ -226,8 +258,6 @@ public class BitacoraController : MonoBehaviour
             Debug.LogWarning($"[BitacoraController] Página {indice} es null.", this);
             return;
         }
-
-        Debug.Log($"[BitacoraController] Mostrando página {indice}: {pagina.nombre}");
 
         if (textoNombre       != null) textoNombre.text       = pagina.nombre;
         if (textoDescripcion1 != null) textoDescripcion1.text = pagina.descripcion1;

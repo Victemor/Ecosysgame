@@ -1,19 +1,19 @@
+// GameplayUIManager.cs
 using UnityEngine;
 
 /// <summary>
 /// Gestiona la UI del HUD durante gameplay.
-/// El botón de menú abre un panel intermedio con dos opciones:
-/// volver al menú o salir del juego.
-/// También gestiona la apertura de la bitácora.
+/// Controla el panel de pausa y el panel de bitácora.
+/// Usa un modelo de panel activo único para evitar superposiciones.
 /// </summary>
 public class GameplayUIManager : MonoBehaviour
 {
     [Header("Panels")]
 
-    [SerializeField, Tooltip("Panel de pausa/salida con botones: Volver al menú y Salir del juego.")]
+    [SerializeField, Tooltip("Panel de pausa con opciones: Volver al menú y Salir.")]
     private PanelAnimator pausePanel;
 
-    [SerializeField, Tooltip("Panel de bitácora.")]
+    [SerializeField, Tooltip("Panel de bitácora del jugador.")]
     private PanelAnimator bitacoraPanel;
 
     private PanelAnimator activePanel;
@@ -22,33 +22,27 @@ public class GameplayUIManager : MonoBehaviour
     {
         pausePanel?.gameObject.SetActive(false);
         bitacoraPanel?.gameObject.SetActive(false);
+        activePanel = null;
     }
 
-    // ── Botón principal de menú ──────────────────────────────────────
+    
+
+    // ── Pausa ────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Abre o cierra el panel de pausa.
-    /// Conectar al botón de "menú" en el HUD.
+    /// Abre o cierra el panel de pausa. Conectar al botón de menú del HUD.
     /// </summary>
     public void OnMenuButtonPressed() => TogglePanel(pausePanel);
 
     /// <summary>
-    /// Cierra el panel de pausa explícitamente.
-    /// Conectar al botón de cerrar/volver dentro del panel de pausa.
+    /// Cierra el panel de pausa. Conectar al botón X dentro del panel.
     /// </summary>
-    public void ClosePausePanel()
-    {
-        if (activePanel == pausePanel)
-        {
-            pausePanel.Hide();
-            activePanel = null;
-        }
-    }
+    public void ClosePausePanel() => ForceClosePanel(pausePanel);
 
-    // ── Desde el panel de pausa ──────────────────────────────────────
+    // ── Navegación ───────────────────────────────────────────────────
 
     /// <summary>
-    /// Guarda el progreso y vuelve al menú principal.
+    /// Guarda y vuelve al menú principal.
     /// </summary>
     public void ReturnToMenu()
     {
@@ -74,38 +68,57 @@ public class GameplayUIManager : MonoBehaviour
     // ── Bitácora ─────────────────────────────────────────────────────
 
     /// <summary>
-    /// Abre o cierra el panel de bitácora.
+    /// Abre o cierra el panel de bitácora. Conectar al botón de bitácora del HUD.
     /// </summary>
     public void OpenPanelBitacora() => TogglePanel(bitacoraPanel);
 
     /// <summary>
-    /// Cierra el panel de bitácora explícitamente.
-    /// Conectar al botón de cerrar dentro del panel de bitácora.
+    /// Cierra el panel de bitácora directamente, sin condiciones.
+    /// Conectar al botón X dentro del panel de bitácora.
     /// </summary>
-    public void ClosePanelBitacora()
-    {
-        if (activePanel == bitacoraPanel)
-        {
-            bitacoraPanel.Hide();
-            activePanel = null;
-        }
-    }
+    public void ClosePanelBitacora() => ForceClosePanel(bitacoraPanel);
 
-    // ── Helper ───────────────────────────────────────────────────────
+    // ── Helpers ──────────────────────────────────────────────────────
 
     private void TogglePanel(PanelAnimator panel)
     {
-        if (panel == null) return;
-
-        if (activePanel == panel)
+        if (panel == null)
         {
-            activePanel.Hide();
-            activePanel = null;
+            Debug.LogError("[GameplayUIManager] Panel no asignado en el Inspector.", this);
             return;
         }
 
-        activePanel?.Hide();
+        if (activePanel == panel)
+        {
+            ForceClosePanel(panel);
+            return;
+        }
+
+        // Cierra el panel activo antes de abrir uno nuevo
+        if (activePanel != null)
+            ForceClosePanel(activePanel);
+
         activePanel = panel;
         activePanel.Show();
+    }
+
+    /// <summary>
+    /// Cierra un panel específico sin importar cuál sea el activePanel.
+    /// Este es el método real de cierre: no tiene guards que fallen silenciosamente.
+    /// Se separó de TogglePanel para que los botones dedicados de cierre
+    /// siempre funcionen, incluso si el estado interno desincroniza.
+    /// </summary>
+    private void ForceClosePanel(PanelAnimator panel)
+    {
+        if (panel == null)
+        {
+            Debug.LogError("[GameplayUIManager] Panel no asignado en el Inspector.", this);
+            return;
+        }
+
+        panel.Hide();
+
+        if (activePanel == panel)
+            activePanel = null;
     }
 }
