@@ -54,8 +54,9 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        // Solo establece Boot. El flujo lo manejan los controladores de cada escena.
         SetState(GameState.Boot);
-        SetState(GameState.Gameplay);
+        SetState(GameState.MainMenu);
     }
 
     /// <summary>

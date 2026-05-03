@@ -31,7 +31,14 @@ public class MainMenuController : MonoBehaviour
         configPanel?.gameObject.SetActive(false);
         optionsPanel?.gameObject.SetActive(false);
         infoPanel?.gameObject.SetActive(false);
+
+        CloseAllPanels();
+
+        // Pedir estado MainMenu al entrar en la escena de menú
+        GameStateController.Instance.RequestState(GameState.MainMenu);
     }
+
+
 
     // ── Botones ──────────────────────────────────────────────────────
 
