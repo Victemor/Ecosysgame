@@ -1421,6 +1421,7 @@ GameObject:
   - component: {fileID: 173536128}
   - component: {fileID: 173536127}
   - component: {fileID: 173536126}
+  - component: {fileID: 173536129}
   m_Layer: 0
   m_Name: ESC
   m_TagString: Untagged
@@ -1541,6 +1542,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 173536124}
   m_CullTransparentMesh: 1
+--- !u!114 &173536129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 173536124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dbe43341fedb6143862f395b427b1cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoverSpriteSwap
+  spriteNormal: {fileID: 21300000, guid: 879053fed50a9db4292105a353ed9cef, type: 3}
+  spriteHover: {fileID: 0}
+  hoverScale: 1.12
+  scaleDuration: 0.15
 --- !u!1 &177518927
 GameObject:
   m_ObjectHideFlags: 0
@@ -3876,6 +3893,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1849594131}
+        m_TargetAssemblyTypeName: BitacoraController, Assembly-CSharp
+        m_MethodName: IrPaginaAnterior
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &422358112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4065,6 +4094,7 @@ RectTransform:
   m_LocalScale: {x: 9, y: 9, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 592738805}
   - {fileID: 1038968350}
   m_Father: {fileID: 1331601124}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5498,6 +5528,7 @@ GameObject:
   - component: {fileID: 592738808}
   - component: {fileID: 592738807}
   - component: {fileID: 592738806}
+  - component: {fileID: 592738809}
   m_Layer: 0
   m_Name: ESC
   m_TagString: Untagged
@@ -5514,10 +5545,10 @@ RectTransform:
   m_GameObject: {fileID: 592738804}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.0888889, y: 0.0888889, z: 1}
+  m_LocalScale: {x: 0.088888906, y: 0.088888906, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1038968350}
+  m_Father: {fileID: 447099705}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -5618,6 +5649,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 592738804}
   m_CullTransparentMesh: 1
+--- !u!114 &592738809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 592738804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dbe43341fedb6143862f395b427b1cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoverSpriteSwap
+  spriteNormal: {fileID: 21300000, guid: 879053fed50a9db4292105a353ed9cef, type: 3}
+  spriteHover: {fileID: 0}
+  hoverScale: 1.12
+  scaleDuration: 0.15
 --- !u!1001 &596097176
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7253,7 +7300,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 4.8
+  m_fontSize: 36
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -8594,6 +8641,18 @@ MonoBehaviour:
       - m_Target: {fileID: 447099709}
         m_TargetAssemblyTypeName: SpriteSequenceAnimator, Assembly-CSharp
         m_MethodName: PlayAnimationA
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1849594131}
+        m_TargetAssemblyTypeName: BitacoraController, Assembly-CSharp
+        m_MethodName: IrPaginaSiguiente
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10040,7 +10099,6 @@ RectTransform:
   - {fileID: 1050389590}
   - {fileID: 422358109}
   - {fileID: 908101945}
-  - {fileID: 592738805}
   m_Father: {fileID: 447099705}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -10154,7 +10212,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 4.7
+  m_fontSize: 36
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -12497,7 +12555,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 6
+  m_fontSize: 36
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -18226,10 +18284,12 @@ MonoBehaviour:
   textoDescripcion2: {fileID: 1050389591}
   imagenPagina: {fileID: 2034028880}
   contenidoContainer: {fileID: 1038968350}
+  contenidoTargetScale: {x: 1, y: 1, z: 1}
   spriteAnimator: {fileID: 447099709}
   scaleOutDuration: 0.2
   scaleInDuration: 0.25
   scaleInOvershoot: 1.08
+  gameplayUIManager: {fileID: 1849594130}
 --- !u!4 &1851843368 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7508121021244474134, guid: 2d54d0a00705a234ea29b4297709f0be, type: 3}
