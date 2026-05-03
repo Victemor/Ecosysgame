@@ -1,18 +1,16 @@
 using System;
+using System.Collections;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Sistema de progreso y persistencia del juego.
-/// Guarda y carga automáticamente usando JSON en Application.persistentDataPath.
-/// Sincroniza ecopuntos con CurrencyManager al entrar y salir de escenas.
-/// Persistente entre escenas (DontDestroyOnLoad).
+/// Sistema de progreso y persistencia.
+/// Guarda: tiempo jugado, ecopuntos, progreso total y vida actual.
+/// Autosave periódico + guardado en cambio de escena y al salir.
 /// </summary>
 public class ProgressManager : MonoBehaviour
 {
-    // ── Singleton ────────────────────────────────────────────────────
-
     private static ProgressManager instance;
 
     public static ProgressManager Instance
@@ -25,27 +23,21 @@ public class ProgressManager : MonoBehaviour
         }
     }
 
-    // ── Configuración ────────────────────────────────────────────────
-
     [Header("Settings")]
 
     [SerializeField, Tooltip("Nombre del archivo de guardado.")]
     private string saveFileName = "progress.json";
 
-    [SerializeField, Tooltip("Nombre de la escena de gameplay para sincronizar ecopuntos.")]
+    [SerializeField, Tooltip("Nombre exacto de la escena de gameplay.")]
     private string gameplaySceneName = "SampleScene";
 
-    // ── Datos ────────────────────────────────────────────────────────
+    [SerializeField, Tooltip("Intervalo de autosave en segundos durante gameplay.")]
+    private float autosaveInterval = 30f;
 
-    /// <summary>Progreso actual del jugador.</summary>
     public GameProgress Progress { get; private set; } = new GameProgress();
-
-    /// <summary>Se dispara cuando el progreso cambia.</summary>
     public event Action OnProgressChanged;
 
-    // ── Estado interno ───────────────────────────────────────────────
-
-    private string SavePath => Path.Combine(Application.persistentDataPath, saveFileName);
+    private string SavePath     => Path.Combine(Application.persistentDataPath, saveFileName);
     private bool   isTrackingTime;
 
     // ── Unity lifecycle ──────────────────────────────────────────────
@@ -54,13 +46,12 @@ public class ProgressManager : MonoBehaviour
     {
         if (instance != null && instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this);
             return;
         }
 
         instance = this;
         DontDestroyOnLoad(gameObject);
-
         Load();
     }
 
@@ -79,13 +70,12 @@ public class ProgressManager : MonoBehaviour
     private void Update()
     {
         if (!isTrackingTime) return;
-
         Progress.tiempoJugadoSegundos += Time.deltaTime;
     }
 
     private void OnApplicationQuit()
     {
-        SyncEcopuntosFromCurrency();
+        SyncFromGameplay();
         Save();
     }
 
@@ -97,53 +87,87 @@ public class ProgressManager : MonoBehaviour
         isTrackingTime  = isGameplay;
 
         if (isGameplay)
-            SyncEcopuntosToCurrency();
+        {
+            SyncToGameplay();
+            StartCoroutine(AutosaveLoop());
+        }
     }
 
     private void OnSceneUnloaded(Scene scene)
     {
-        if (scene.name == gameplaySceneName)
+        if (scene.name != gameplaySceneName) return;
+
+        isTrackingTime = false;
+        StopAllCoroutines();
+        SyncFromGameplay();
+        Save();
+    }
+
+    private IEnumerator AutosaveLoop()
+    {
+        while (isTrackingTime)
         {
-            SyncEcopuntosFromCurrency();
-            Save();
+            yield return new WaitForSeconds(autosaveInterval);
+
+            if (isTrackingTime)
+            {
+                SyncFromGameplay();
+                Save();
+                Debug.Log("[ProgressManager] Autosave ejecutado.");
+            }
         }
     }
 
-    /// <summary>
-    /// Al entrar en gameplay, carga los ecopuntos guardados en CurrencyManager.
-    /// </summary>
-    private void SyncEcopuntosToCurrency()
-    {
-        CurrencyManager currency = FindFirstObjectByType<CurrencyManager>();
+    // ── Sincronización ───────────────────────────────────────────────
 
+    /// <summary>
+    /// Al entrar en gameplay: restaura ecopuntos y vida guardados.
+    /// </summary>
+    private void SyncToGameplay()
+    {
+        CurrencyManager currency = CurrencyManager.Instance;
         if (currency != null)
             currency.SetAmount(Progress.ecopuntos);
+
+        StartCoroutine(RestoreHealthDelayed());
     }
 
     /// <summary>
-    /// Al salir de gameplay, guarda los ecopuntos de CurrencyManager en Progress.
+    /// Al salir de gameplay: guarda ecopuntos y vida actuales.
     /// </summary>
-    private void SyncEcopuntosFromCurrency()
+    private void SyncFromGameplay()
     {
-        CurrencyManager currency = FindFirstObjectByType<CurrencyManager>();
-
+        CurrencyManager currency = CurrencyManager.Instance;
         if (currency != null)
-        {
             Progress.ecopuntos = currency.Amount;
-            OnProgressChanged?.Invoke();
-        }
+
+        PlayerHealth health = FindFirstObjectByType<PlayerHealth>();
+        if (health != null)
+            Progress.vidaActual = health.VidaActual;
+
+        OnProgressChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Espera un frame para que PlayerHealth exista en escena antes de restaurar.
+    /// </summary>
+    private IEnumerator RestoreHealthDelayed()
+    {
+        yield return null;
+
+        PlayerHealth health = FindFirstObjectByType<PlayerHealth>();
+        if (health != null && Progress.vidaActual >= 0)
+            health.SetVida(Progress.vidaActual);
     }
 
     // ── API pública ──────────────────────────────────────────────────
 
-    /// <summary>Añade ecopuntos directamente al progreso guardado.</summary>
     public void AddEcopuntos(int cantidad)
     {
         Progress.ecopuntos = Mathf.Max(0, Progress.ecopuntos + cantidad);
         OnProgressChanged?.Invoke();
     }
 
-    /// <summary>Establece el progreso total del juego (0-100).</summary>
     public void SetProgresoTotal(float valor)
     {
         Progress.progresoTotal = Mathf.Clamp(valor, 0f, 100f);
@@ -152,27 +176,38 @@ public class ProgressManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Reinicia todo el progreso a cero y guarda.
+    /// Reinicia todo el progreso a cero y sincroniza todos los sistemas vivos.
+    /// Fuerza la actualización de UI aunque los valores ya fueran cero.
     /// </summary>
     public void ResetProgress()
     {
         Progress = new GameProgress();
-        OnProgressChanged?.Invoke();
         Save();
+
+        // Resetear dinero y forzar notificación aunque ya fuera 0
+        CurrencyManager currency = CurrencyManager.Instance;
+        if (currency != null)
+        {
+            currency.SetAmount(0);
+            currency.ForceNotify();
+        }
+
+        // Resetear vida al máximo si hay PlayerHealth en escena
+        PlayerHealth health = FindFirstObjectByType<PlayerHealth>();
+        if (health != null)
+            health.SetVida(health.VidaMax);
+
+        OnProgressChanged?.Invoke();
 
         Debug.Log("[ProgressManager] Progreso reiniciado.");
     }
 
-    // ── Guardado / Carga ─────────────────────────────────────────────
-
-    /// <summary>Guarda el progreso en disco como JSON.</summary>
     public void Save()
     {
         try
         {
             string json = JsonUtility.ToJson(Progress, prettyPrint: true);
             File.WriteAllText(SavePath, json);
-            Debug.Log($"[ProgressManager] Guardado en: {SavePath}");
         }
         catch (Exception e)
         {
@@ -180,7 +215,6 @@ public class ProgressManager : MonoBehaviour
         }
     }
 
-    /// <summary>Carga el progreso desde disco. Si no existe, crea uno nuevo.</summary>
     public void Load()
     {
         try
@@ -188,13 +222,13 @@ public class ProgressManager : MonoBehaviour
             if (File.Exists(SavePath))
             {
                 string json = File.ReadAllText(SavePath);
-                Progress = JsonUtility.FromJson<GameProgress>(json);
+                Progress    = JsonUtility.FromJson<GameProgress>(json);
                 Debug.Log("[ProgressManager] Progreso cargado.");
             }
             else
             {
                 Progress = new GameProgress();
-                Debug.Log("[ProgressManager] No hay guardado previo. Iniciando nuevo progreso.");
+                Debug.Log("[ProgressManager] Nuevo progreso iniciado.");
             }
 
             OnProgressChanged?.Invoke();
@@ -206,16 +240,12 @@ public class ProgressManager : MonoBehaviour
         }
     }
 
-    // ── Formato de tiempo ────────────────────────────────────────────
-
-    /// <summary>Devuelve el tiempo jugado formateado como HH:MM:SS.</summary>
     public string GetFormattedTime()
     {
         float total   = Progress.tiempoJugadoSegundos;
         int   hours   = (int)(total / 3600);
         int   minutes = (int)(total % 3600 / 60);
         int   seconds = (int)(total % 60);
-
         return $"{hours:00}:{minutes:00}:{seconds:00}";
     }
 }

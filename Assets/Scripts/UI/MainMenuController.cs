@@ -3,7 +3,6 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Controlador del menú principal.
-/// Gestiona navegación, salida del juego y apertura de paneles con animación.
 /// </summary>
 public class MainMenuController : MonoBehaviour
 {
@@ -27,18 +26,11 @@ public class MainMenuController : MonoBehaviour
 
     private void Start()
     {
-        // Desactivar todos los paneles sin animación al iniciar
-        configPanel?.gameObject.SetActive(false);
-        optionsPanel?.gameObject.SetActive(false);
-        infoPanel?.gameObject.SetActive(false);
-
         CloseAllPanels();
 
-        // Pedir estado MainMenu al entrar en la escena de menú
-        GameStateController.Instance.RequestState(GameState.MainMenu);
+        if (GameStateController.Instance != null)
+            GameStateController.Instance.RequestState(GameState.MainMenu);
     }
-
-
 
     // ── Botones ──────────────────────────────────────────────────────
 
@@ -50,11 +42,19 @@ public class MainMenuController : MonoBehaviour
             return;
         }
 
-        SceneManager.LoadScene(gameSceneName);
+        ProgressManager.Instance?.Save();
+
+        // SceneLoader como primera opción, SceneManager como fallback seguro
+        if (SceneLoader.Instance != null)
+            SceneLoader.Instance.LoadScene(gameSceneName);
+        else
+            SceneManager.LoadScene(gameSceneName);
     }
 
     public void OnQuitPressed()
     {
+        ProgressManager.Instance?.Save();
+
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -75,12 +75,8 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
-    // ── Lógica de paneles ────────────────────────────────────────────
+    // ── Paneles ──────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Abre un panel. Si hay otro abierto, lo cierra primero.
-    /// Si se abre el mismo panel que ya está activo, lo cierra.
-    /// </summary>
     private void OpenPanel(PanelAnimator panel)
     {
         if (panel == null) return;
@@ -95,5 +91,13 @@ public class MainMenuController : MonoBehaviour
         activePanel?.Hide();
         activePanel = panel;
         activePanel.Show();
+    }
+
+    private void CloseAllPanels()
+    {
+        configPanel?.gameObject.SetActive(false);
+        optionsPanel?.gameObject.SetActive(false);
+        infoPanel?.gameObject.SetActive(false);
+        activePanel = null;
     }
 }

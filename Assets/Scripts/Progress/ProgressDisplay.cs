@@ -2,12 +2,13 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// Muestra los datos de progreso del jugador en el menú principal.
-/// Se suscribe a ProgressManager.OnProgressChanged y actualiza los textos.
+/// Muestra datos de progreso en tiempo real.
+/// Funciona tanto en menú como en gameplay.
+/// El tiempo se actualiza cada frame desde Update().
 /// </summary>
 public class ProgressDisplay : MonoBehaviour
 {
-    [Header("References")]
+    [Header("Textos")]
 
     [SerializeField, Tooltip("Texto que muestra el tiempo jugado.")]
     private TextMeshProUGUI tiempoText;
@@ -18,46 +19,47 @@ public class ProgressDisplay : MonoBehaviour
     [SerializeField, Tooltip("Texto que muestra el progreso total.")]
     private TextMeshProUGUI progresoText;
 
-    [Header("Formato")]
+    [Header("Prefijos")]
 
-    [SerializeField, Tooltip("Prefijo del texto de tiempo.")]
+    [SerializeField]
     private string tiempoPrefix = "Tu tiempo jugado es: ";
 
-    [SerializeField, Tooltip("Prefijo del texto de ecopuntos.")]
+    [SerializeField]
     private string ecopuntosPrefix = "La cantidad de ecopuntos que tienes actualmente es: ";
 
-    [SerializeField, Tooltip("Prefijo del texto de progreso.")]
+    [SerializeField]
     private string progresoPrefix = "Tu progreso actual es: ";
-
-    // ── Unity lifecycle ──────────────────────────────────────────────
 
     private void OnEnable()
     {
         if (ProgressManager.Instance != null)
         {
-            ProgressManager.Instance.OnProgressChanged += RefreshUI;
-            RefreshUI();
+            ProgressManager.Instance.OnProgressChanged += RefreshStatic;
+            RefreshStatic();
         }
     }
 
     private void OnDisable()
     {
         if (ProgressManager.Instance != null)
-            ProgressManager.Instance.OnProgressChanged -= RefreshUI;
+            ProgressManager.Instance.OnProgressChanged -= RefreshStatic;
     }
 
-    // ── Update en tiempo real para el timer ──────────────────────────
-
+    /// <summary>
+    /// Actualiza el tiempo en tiempo real cada frame.
+    /// Así si el panel está abierto durante gameplay, el timer sigue corriendo visualmente.
+    /// </summary>
     private void Update()
     {
-        // Actualizar tiempo en tiempo real si está en gameplay
-        if (tiempoText != null && ProgressManager.Instance != null)
-            tiempoText.text = tiempoPrefix + ProgressManager.Instance.GetFormattedTime();
+        if (tiempoText == null || ProgressManager.Instance == null) return;
+        tiempoText.text = tiempoPrefix + ProgressManager.Instance.GetFormattedTime();
     }
 
-    // ── Refresh ──────────────────────────────────────────────────────
-
-    private void RefreshUI()
+    /// <summary>
+    /// Actualiza ecopuntos y progreso (no cambian cada frame).
+    /// Se llama al suscribirse y cuando OnProgressChanged dispara.
+    /// </summary>
+    private void RefreshStatic()
     {
         if (ProgressManager.Instance == null) return;
 

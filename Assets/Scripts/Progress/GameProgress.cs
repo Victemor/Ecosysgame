@@ -15,4 +15,10 @@ public class GameProgress
 
     /// <summary>Progreso total del juego (0-100).</summary>
     public float progresoTotal;
+
+    /// <summary>
+    /// Vida actual del jugador al guardar.
+    /// -1 significa que no hay dato guardado (usa el máximo por defecto).
+    /// </summary>
+    public int vidaActual = -1;
 }

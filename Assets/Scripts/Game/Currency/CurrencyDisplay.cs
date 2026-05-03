@@ -2,16 +2,14 @@ using UnityEngine;
 
 /// <summary>
 /// Controla el grupo de dígitos que muestra el dinero del jugador.
-/// Funciona igual que HealthUI: tú colocas N imágenes en escena,
-/// las asignas al array, y el script las actualiza automáticamente.
-/// Los dígitos de mayor peso van a la izquierda.
-/// Si el número tiene menos dígitos que imágenes, los sobrantes muestran 0.
+/// Si no hay CurrencyManager asignado en el Inspector, lo busca automáticamente
+/// usando el singleton. Esto permite que funcione con GamePersistence.
 /// </summary>
 public class CurrencyDisplay : MonoBehaviour
 {
     [Header("References")]
 
-    [SerializeField, Tooltip("Referencia al CurrencyManager del jugador.")]
+    [SerializeField, Tooltip("Referencia al CurrencyManager. Si está vacío se busca automáticamente.")]
     private CurrencyManager currencyManager;
 
     [SerializeField, Tooltip("Dígitos de izquierda a derecha. El primero es el de mayor valor.")]
@@ -22,13 +20,22 @@ public class CurrencyDisplay : MonoBehaviour
 
     // ── Unity lifecycle ──────────────────────────────────────────────
 
+    private void Awake()
+    {
+        // Auto-buscar si no fue asignado en Inspector
+        if (currencyManager == null)
+            currencyManager = CurrencyManager.Instance;
+
+        if (currencyManager == null)
+            Debug.LogError("[CurrencyDisplay] No se encontró CurrencyManager en la escena.", this);
+    }
+
     private void OnEnable()
     {
         if (currencyManager == null)
-        {
-            Debug.LogError("[CurrencyDisplay] Asigna un CurrencyManager.", this);
-            return;
-        }
+            currencyManager = CurrencyManager.Instance;
+
+        if (currencyManager == null) return;
 
         currencyManager.OnCurrencyChanged += HandleCurrencyChanged;
         UpdateDisplay(currencyManager.Amount, false);
@@ -49,10 +56,6 @@ public class CurrencyDisplay : MonoBehaviour
 
     // ── Display ──────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Distribuye el valor en los dígitos de derecha a izquierda.
-    /// Los slots sobrantes (dígitos de mayor peso sin valor) muestran 0.
-    /// </summary>
     private void UpdateDisplay(int value, bool animate)
     {
         if (digits == null || digits.Length == 0) return;
@@ -63,14 +66,11 @@ public class CurrencyDisplay : MonoBehaviour
         {
             if (digits[i] == null) continue;
 
-            // Índice desde la derecha: el último dígito es las unidades
             int fromRight  = totalSlots - 1 - i;
             int digitValue = (value / (int)Mathf.Pow(10, fromRight)) % 10;
 
             float delay = animate ? (totalSlots - 1 - i) * digitStagger : 0f;
 
-            // Si hay delay, se necesita animar con un pequeño delay por dígito
-            // Se pasa el animate directo — DigitDisplay maneja si cambió o no
             if (animate && delay > 0f)
                 StartCoroutine(AnimateWithDelay(digits[i], digitValue, delay));
             else

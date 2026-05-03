@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a5c670081433024481f40caa5a0980d, type: 3}
+  m_Name: BitacoraPage1
+  m_EditorClassIdentifier: Assembly-CSharp::BitacoraPageData
+  nombre: Phollidobolus vertebralis
+  descripcion1: "Es un peque\xF1o lagarto, Vive en ambientes fr\xEDos como p\xE1ramos
+    y bosques de niebla, donde se mueve entre la vegetaci\xF3n y el suelo h\xFAmedo."
+  descripcion2: ' Se alimenta principalmente de insectos y otros invertebrados. No
+    es peligroso y cumple un papel importante controlando plagas en su ecosistema.'
+  imagen: {fileID: 21300000, guid: 3387895d43b6f0148a2cbcc25e77cfb5, type: 3}

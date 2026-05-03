@@ -3638,7 +3638,6 @@ GameObject:
   - component: {fileID: 1917129353}
   - component: {fileID: 1917129356}
   - component: {fileID: 1917129355}
-  - component: {fileID: 1917129354}
   m_Layer: 0
   m_Name: GamePersistence
   m_TagString: Untagged
@@ -3714,19 +3713,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProgressManager
   saveFileName: progress.json
   gameplaySceneName: SampleScene
---- !u!114 &1917129354
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1917129348}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 553bbdd3cd09d274ba6f1c44679e1812, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CurrencyManager
-  startingAmount: 0
+  autosaveInterval: 30
 --- !u!114 &1917129355
 MonoBehaviour:
   m_ObjectHideFlags: 0

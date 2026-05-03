@@ -16,16 +16,17 @@ MonoBehaviour:
   speakerName: Guagua Loba
   startNode:
     nodeId: PruebaStart
-    text: Este es un start
+    text: Hola, soy Dinomys branickii, aunque muchos me conocen como Guagua Loba
     choices: []
     dialogueEvent:
       eventId: 
       eventType: 0
       payload: {fileID: 0}
-    nextNodeId: Prueba
+    nextNodeId: Presentacion
   nodes:
-  - nodeId: Prueba
-    text: Hola este es un texto de prueba
+  - nodeId: Presentacion
+    text: "Vivo en los bosques andinos, donde hay humedad, rocas y buen refugio.
+      Soy tranquilo, de h\xE1bitos nocturnos, y me gusta alimentarme de hojas y frutos. "
     choices: []
     dialogueEvent:
       eventId: 

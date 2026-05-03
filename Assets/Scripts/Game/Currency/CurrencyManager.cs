@@ -8,6 +8,7 @@ using UnityEngine;
 public class CurrencyManager : MonoBehaviour
 {
     private static CurrencyManager instance;
+
     public static CurrencyManager Instance
     {
         get
@@ -23,7 +24,6 @@ public class CurrencyManager : MonoBehaviour
     [SerializeField, Tooltip("Dinero inicial al arrancar.")]
     private int startingAmount = 0;
 
-    /// <summary>Dinero actual del jugador.</summary>
     public int Amount { get; private set; }
 
     /// <summary>
@@ -36,7 +36,7 @@ public class CurrencyManager : MonoBehaviour
     {
         if (instance != null && instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this);
             return;
         }
 
@@ -68,5 +68,15 @@ public class CurrencyManager : MonoBehaviour
 
         if (previous != Amount)
             OnCurrencyChanged?.Invoke(previous, Amount);
+    }
+
+    /// <summary>
+    /// Fuerza la notificación del valor actual aunque no haya cambiado.
+    /// Usado por ResetProgress para asegurar que la UI se actualice
+    /// incluso cuando el valor ya era 0 antes del reset.
+    /// </summary>
+    public void ForceNotify()
+    {
+        OnCurrencyChanged?.Invoke(Amount, Amount);
     }
 }
