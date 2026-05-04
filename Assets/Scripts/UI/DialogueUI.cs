@@ -138,7 +138,9 @@ public class DialogueUI : MonoBehaviour
 
     /// <summary>
     /// Revela el texto carácter por carácter usando el sistema de visibilidad de TMP.
-    /// Usar maxVisibleCharacters es más eficiente que manipular el string en cada frame.
+    /// Usa WaitForSecondsRealtime en lugar de WaitForSeconds porque durante el
+    /// diálogo Time.timeScale es 0 — el tiempo del motor está pausado pero
+    /// la UI debe seguir animándose con normalidad.
     /// </summary>
     private IEnumerator TypewriterRoutine(string text)
     {
@@ -147,17 +149,17 @@ public class DialogueUI : MonoBehaviour
         SetContinueIndicator(false);
 
         bodyText.text = text;
-        bodyText.ForceMeshUpdate(); // ← esto es lo que falta
+        bodyText.ForceMeshUpdate();
 
-        int totalChars = bodyText.textInfo.characterCount;
-        float interval = 1f / charsPerSecond;
+        int   totalChars = bodyText.textInfo.characterCount;
+        float interval   = 1f / charsPerSecond;
 
         bodyText.maxVisibleCharacters = 0;
 
         for (int i = 0; i < totalChars; i++)
         {
             bodyText.maxVisibleCharacters = i + 1;
-            yield return new WaitForSeconds(interval);
+            yield return new WaitForSecondsRealtime(interval); // ← único cambio
         }
 
         FinishTypewriter();

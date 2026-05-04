@@ -15,8 +15,8 @@ TagManager:
   - Interactable
   - Ground
   - Obstacles
-  - 
-  - 
+  - WorldCell
+  - CollectibleItem
   - 
   - 
   - 

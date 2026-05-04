@@ -25,7 +25,6 @@ public class GameplayController : BaseController
     {
         base.OnDisable();
 
-        // Protección ante el caso en que DialogueController ya fue destruido
         if (DialogueController.Instance != null)
             DialogueController.Instance.OnDialogueEnded -= HandleDialogueEnded;
     }
@@ -36,6 +35,14 @@ public class GameplayController : BaseController
 
         SetSystemState(playerMovement, isGameplay);
         SetSystemState(cameraSystem,   isGameplay);
+
+        // Pausa el tiempo del motor en estados que requieren congelar el mundo.
+        // Time.timeScale = 0 detiene físicas, animaciones, Coroutines con
+        // WaitForSeconds y cualquier Update que use Time.deltaTime.
+        // La UI del diálogo usa WaitForSecondsRealtime para ignorar esta pausa.
+        Time.timeScale = (newState == GameState.Dialogue || newState == GameState.Paused)
+            ? 0f
+            : 1f;
     }
 
     /// <summary>

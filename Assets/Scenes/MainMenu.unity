@@ -3765,6 +3765,7 @@ MonoBehaviour:
   saveFileName: progress.json
   gameplaySceneName: SampleScene
   autosaveInterval: 30
+  itemDatabase: {fileID: 11400000, guid: 34ea218fd50d651419d7bc47ffb216e8, type: 2}
 --- !u!114 &1917129355
 MonoBehaviour:
   m_ObjectHideFlags: 0

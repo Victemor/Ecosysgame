@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce810584de735734c8851fc8bd383eff, type: 3}
+  m_Name: New Placement Filter
+  m_EditorClassIdentifier: Assembly-CSharp::PlacementFilter
+  allowedItems:
+  - {fileID: 11400000, guid: d433b98b58723ac42a127ba511108312, type: 2}

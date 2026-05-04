@@ -5,12 +5,15 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Sistema de progreso y persistencia.
-/// Guarda: tiempo jugado, ecopuntos, progreso total y vida actual.
+/// Sistema central de progreso y persistencia.
+/// Guarda: tiempo jugado, ecopuntos, progreso total, vida actual,
+/// estado del inventario, WorldCells ocupadas y CollectibleItems recogidos.
 /// Autosave periódico + guardado en cambio de escena y al salir.
 /// </summary>
 public class ProgressManager : MonoBehaviour
 {
+    // ── Singleton ────────────────────────────────────────────────────
+
     private static ProgressManager instance;
 
     public static ProgressManager Instance
@@ -23,9 +26,11 @@ public class ProgressManager : MonoBehaviour
         }
     }
 
+    // ── Campos serializados ──────────────────────────────────────────
+
     [Header("Settings")]
 
-    [SerializeField, Tooltip("Nombre del archivo de guardado.")]
+    [SerializeField, Tooltip("Nombre del archivo de guardado de progreso general.")]
     private string saveFileName = "progress.json";
 
     [SerializeField, Tooltip("Nombre exacto de la escena de gameplay.")]
@@ -34,10 +39,18 @@ public class ProgressManager : MonoBehaviour
     [SerializeField, Tooltip("Intervalo de autosave en segundos durante gameplay.")]
     private float autosaveInterval = 30f;
 
+    [Header("Save System")]
+
+    [SerializeField, Tooltip("Base de datos de todos los ítems del juego. " +
+                             "Necesario para resolver IDs al cargar el estado del mundo.")]
+    private ItemDatabase itemDatabase;
+
+    // ── Estado ───────────────────────────────────────────────────────
+
     public GameProgress Progress { get; private set; } = new GameProgress();
     public event Action OnProgressChanged;
 
-    private string SavePath     => Path.Combine(Application.persistentDataPath, saveFileName);
+    private string SavePath    => Path.Combine(Application.persistentDataPath, saveFileName);
     private bool   isTrackingTime;
 
     // ── Unity lifecycle ──────────────────────────────────────────────
@@ -121,7 +134,7 @@ public class ProgressManager : MonoBehaviour
     // ── Sincronización ───────────────────────────────────────────────
 
     /// <summary>
-    /// Al entrar en gameplay: restaura ecopuntos y vida guardados.
+    /// Al entrar en gameplay: restaura ecopuntos, vida y estado del mundo.
     /// </summary>
     private void SyncToGameplay()
     {
@@ -130,10 +143,11 @@ public class ProgressManager : MonoBehaviour
             currency.SetAmount(Progress.ecopuntos);
 
         StartCoroutine(RestoreHealthDelayed());
+        StartCoroutine(LoadWorldDelayed());
     }
 
     /// <summary>
-    /// Al salir de gameplay: guarda ecopuntos y vida actuales.
+    /// Al salir de gameplay: guarda ecopuntos, vida y estado del mundo.
     /// </summary>
     private void SyncFromGameplay()
     {
@@ -145,6 +159,7 @@ public class ProgressManager : MonoBehaviour
         if (health != null)
             Progress.vidaActual = health.VidaActual;
 
+        SaveWorldState();
         OnProgressChanged?.Invoke();
     }
 
@@ -160,7 +175,110 @@ public class ProgressManager : MonoBehaviour
             health.SetVida(Progress.vidaActual);
     }
 
-    // ── API pública ──────────────────────────────────────────────────
+    /// <summary>
+    /// Espera un frame para que todos los GameObjects de la escena estén inicializados
+    /// antes de intentar restaurar el estado del mundo.
+    /// </summary>
+    private IEnumerator LoadWorldDelayed()
+    {
+        yield return null;
+        LoadWorldSave();
+    }
+
+    // ── World Save / Load ────────────────────────────────────────────
+
+    /// <summary>
+    /// Guarda el estado completo del mundo: inventario, celdas ocupadas
+    /// y coleccionables ya recogidos.
+    /// Se llama automáticamente al salir de Gameplay y tras cada acción relevante.
+    /// </summary>
+    public void SaveWorldState()
+    {
+        if (itemDatabase == null)
+        {
+            Debug.LogWarning("[ProgressManager] ItemDatabase no asignado — no se puede guardar el mundo.");
+            return;
+        }
+
+        GameSaveData data = new GameSaveData();
+
+        // ── Inventario ────────────────────────────────────────────
+        if (InventorySystem.Instance != null)
+            data.inventorySlots = InventorySystem.Instance.ExportSaveData();
+
+        // ── WorldCells ocupadas ───────────────────────────────────
+        WorldCell[] cells = FindObjectsByType<WorldCell>(FindObjectsSortMode.None);
+
+        foreach (WorldCell cell in cells)
+        {
+            if (!cell.IsOccupied) continue;
+
+            data.occupiedCells.Add(new WorldCellSaveEntry
+            {
+                cellId = cell.PersistId,
+                itemId = cell.PlacedItemId
+            });
+        }
+
+        // ── CollectibleItems recogidos ────────────────────────────
+        CollectibleItem[] collectibles = FindObjectsByType<CollectibleItem>(
+            FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+        foreach (CollectibleItem col in collectibles)
+        {
+            if (!col.gameObject.activeSelf)
+                data.collectedItemIds.Add(col.PersistId);
+        }
+
+        SaveSystem.Save(data);
+    }
+
+    /// <summary>
+    /// Carga y aplica el estado guardado del mundo:
+    /// inventario, celdas y coleccionables.
+    /// </summary>
+    private void LoadWorldSave()
+    {
+        if (itemDatabase == null)
+        {
+            Debug.LogWarning("[ProgressManager] ItemDatabase no asignado — no se puede cargar el mundo.");
+            return;
+        }
+
+        GameSaveData data = SaveSystem.Load();
+        if (data == null) return;
+
+        // ── Inventario ────────────────────────────────────────────
+        if (InventorySystem.Instance != null)
+            InventorySystem.Instance.LoadFromSaveData(data.inventorySlots, itemDatabase);
+
+        // ── WorldCells ────────────────────────────────────────────
+        WorldCell[] cells = FindObjectsByType<WorldCell>(FindObjectsSortMode.None);
+
+        foreach (WorldCell cell in cells)
+        {
+            foreach (WorldCellSaveEntry entry in data.occupiedCells)
+            {
+                if (entry.cellId != cell.PersistId) continue;
+
+                ItemData item = itemDatabase.GetById(entry.itemId);
+                cell.RestoreFromSave(item);
+                break;
+            }
+        }
+
+        // ── CollectibleItems ──────────────────────────────────────
+        CollectibleItem[] collectibles = FindObjectsByType<CollectibleItem>(
+            FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+        foreach (CollectibleItem col in collectibles)
+        {
+            if (data.collectedItemIds.Contains(col.PersistId))
+                col.RestoreAsCollected();
+        }
+    }
+
+    // ── Progress API pública ─────────────────────────────────────────
 
     public void AddEcopuntos(int cantidad)
     {
@@ -176,15 +294,14 @@ public class ProgressManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Reinicia todo el progreso a cero y sincroniza todos los sistemas vivos.
-    /// Fuerza la actualización de UI aunque los valores ya fueran cero.
+    /// Reinicia todo el progreso a cero: stats, inventario y estado del mundo.
     /// </summary>
     public void ResetProgress()
     {
         Progress = new GameProgress();
         Save();
+        SaveSystem.DeleteSave();
 
-        // Resetear dinero y forzar notificación aunque ya fuera 0
         CurrencyManager currency = CurrencyManager.Instance;
         if (currency != null)
         {
@@ -192,7 +309,6 @@ public class ProgressManager : MonoBehaviour
             currency.ForceNotify();
         }
 
-        // Resetear vida al máximo si hay PlayerHealth en escena
         PlayerHealth health = FindFirstObjectByType<PlayerHealth>();
         if (health != null)
             health.SetVida(health.VidaMax);
@@ -201,6 +317,8 @@ public class ProgressManager : MonoBehaviour
 
         Debug.Log("[ProgressManager] Progreso reiniciado.");
     }
+
+    // ── Progress Save / Load ─────────────────────────────────────────
 
     public void Save()
     {
@@ -211,7 +329,7 @@ public class ProgressManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"[ProgressManager] Error al guardar: {e.Message}");
+            Debug.LogError($"[ProgressManager] Error al guardar progreso: {e.Message}");
         }
     }
 
@@ -228,14 +346,14 @@ public class ProgressManager : MonoBehaviour
             else
             {
                 Progress = new GameProgress();
-                Debug.Log("[ProgressManager] Nuevo progreso iniciado.");
+                Debug.Log("[ProgressManager] Nueva partida iniciada.");
             }
 
             OnProgressChanged?.Invoke();
         }
         catch (Exception e)
         {
-            Debug.LogError($"[ProgressManager] Error al cargar: {e.Message}");
+            Debug.LogError($"[ProgressManager] Error al cargar progreso: {e.Message}");
             Progress = new GameProgress();
         }
     }
