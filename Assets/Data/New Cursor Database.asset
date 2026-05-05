@@ -29,8 +29,3 @@ MonoBehaviour:
       m_Bits: 1024
     cursorTexture: {fileID: 2800000, guid: f42cc8afdd1f9ef4abff6065cfe65daa, type: 3}
     priority: 0
-  - targetLayer:
-      serializedVersion: 2
-      m_Bits: 1024
-    cursorTexture: {fileID: 2800000, guid: f42cc8afdd1f9ef4abff6065cfe65daa, type: 3}
-    priority: 0

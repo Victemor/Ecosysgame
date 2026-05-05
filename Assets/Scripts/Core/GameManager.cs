@@ -26,7 +26,10 @@ public class GameManager : MonoBehaviour
     {
         if (instance != null && instance != this)
         {
-            Destroy(gameObject);
+            // Destroy(this) destruye solo el componente, NO el GameObject.
+            // Destroy(gameObject) destruiría todo el GamePersistence,
+            // matando ProgressManager, SceneLoader, etc. en el mismo objeto.
+            Destroy(this);
             return;
         }
 
@@ -36,8 +39,6 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        // Solo establece Boot. Cada escena pide su propio estado a través
-        // de MainMenuController o GameplaySceneBootstrap.
         SetState(GameState.Boot);
     }
 
