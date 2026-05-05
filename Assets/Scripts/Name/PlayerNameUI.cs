@@ -5,7 +5,6 @@ using UnityEngine.UI;
 /// <summary>
 /// Controla la UI de nombre del jugador en el menú principal.
 /// Gestiona el InputField, el botón de confirmación y el texto de saludo.
-/// Se suscribe a OnProgressChanged para reflejar resets automáticamente.
 /// </summary>
 public class PlayerNameUI : MonoBehaviour
 {
@@ -46,8 +45,6 @@ public class PlayerNameUI : MonoBehaviour
 
     private void OnEnable()
     {
-        // Suscribirse a OnProgressChanged para detectar resets y otros
-        // cambios externos que afecten el nombre sin pasar por esta UI.
         if (ProgressManager.Instance != null)
             ProgressManager.Instance.OnProgressChanged += HandleProgressChanged;
 
@@ -84,19 +81,12 @@ public class PlayerNameUI : MonoBehaviour
             return;
         }
 
-        string validName = input.Trim();
+        ProgressManager.Instance?.SetPlayerName(input.Trim());
 
-        ProgressManager.Instance.SetPlayerName(validName);
-
-        RefreshGreeting();
         ClearInputField();
         ShowFeedback("¡Nombre guardado!", isError: false);
     }
 
-    /// <summary>
-    /// Reacciona a cualquier cambio de progreso externo (reset, carga, etc).
-    /// Refresca el saludo para que siempre refleje el estado real del save.
-    /// </summary>
     private void HandleProgressChanged()
     {
         RefreshGreeting();

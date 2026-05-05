@@ -332,8 +332,8 @@ GameObject:
   - component: {fileID: 74899511}
   - component: {fileID: 74899515}
   - component: {fileID: 74899514}
-  - component: {fileID: 74899513}
   - component: {fileID: 74899512}
+  - component: {fileID: 74899516}
   m_Layer: 0
   m_Name: Musica
   m_TagString: Untagged
@@ -404,22 +404,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &74899513
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 74899510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3dbe43341fedb6143862f395b427b1cd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoverSpriteSwap
-  spriteNormal: {fileID: 0}
-  spriteHover: {fileID: 0}
-  hoverScale: 1.12
-  scaleDuration: 0.15
 --- !u!114 &74899514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -440,7 +424,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a16980993501ff4409534525e116c9ee, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 184d67e89e00cd448a522e61a551d142, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -458,6 +442,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 74899510}
   m_CullTransparentMesh: 1
+--- !u!114 &74899516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74899510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 246b7ac37d59d7f4d940d630bab5c72e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonSpriteCycler
+  sprites:
+  - {fileID: 21300000, guid: 184d67e89e00cd448a522e61a551d142, type: 3}
+  - {fileID: 21300000, guid: e03878fda508aed4aa49f9b6da3fae83, type: 3}
 --- !u!1 &120022190
 GameObject:
   m_ObjectHideFlags: 0
@@ -1696,8 +1695,8 @@ GameObject:
   - component: {fileID: 481846781}
   - component: {fileID: 481846785}
   - component: {fileID: 481846784}
-  - component: {fileID: 481846783}
   - component: {fileID: 481846782}
+  - component: {fileID: 481846786}
   m_Layer: 0
   m_Name: Sonido
   m_TagString: Untagged
@@ -1768,22 +1767,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &481846783
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 481846780}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3dbe43341fedb6143862f395b427b1cd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HoverSpriteSwap
-  spriteNormal: {fileID: 0}
-  spriteHover: {fileID: 0}
-  hoverScale: 1.12
-  scaleDuration: 0.15
 --- !u!114 &481846784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1804,7 +1787,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a16980993501ff4409534525e116c9ee, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e9019237b9136bf44bf409d2ede7a79f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1822,6 +1805,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 481846780}
   m_CullTransparentMesh: 1
+--- !u!114 &481846786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481846780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 246b7ac37d59d7f4d940d630bab5c72e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonSpriteCycler
+  sprites:
+  - {fileID: 21300000, guid: e9019237b9136bf44bf409d2ede7a79f, type: 3}
+  - {fileID: 21300000, guid: b5d9a583b88db004c9c535f83655aabb, type: 3}
 --- !u!1 &511880498
 GameObject:
   m_ObjectHideFlags: 0
@@ -2191,8 +2189,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1917129353}
-        m_TargetAssemblyTypeName: ProgressManager, Assembly-CSharp
+      - m_Target: {fileID: 933839486}
+        m_TargetAssemblyTypeName: MenuBridge, Assembly-CSharp
         m_MethodName: ResetProgress
         m_Mode: 1
         m_Arguments:
@@ -3011,6 +3009,8 @@ GameObject:
   m_Component:
   - component: {fileID: 933839484}
   - component: {fileID: 933839485}
+  - component: {fileID: 933839486}
+  - component: {fileID: 933839487}
   m_Layer: 0
   m_Name: Ui
   m_TagString: Untagged
@@ -3050,6 +3050,37 @@ MonoBehaviour:
   configPanel: {fileID: 132221945}
   optionsPanel: {fileID: 521389745}
   infoPanel: {fileID: 1397397506}
+--- !u!114 &933839486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 933839483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d441d02a65a6c8f47bab6911a630b28a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MenuBridge
+--- !u!114 &933839487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 933839483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b84acd845160d94ea56c8346a6219e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerNameUI
+  nameInputField: {fileID: 455471450}
+  confirmButton: {fileID: 398310074}
+  greetingText: {fileID: 427873252}
+  feedbackText: {fileID: 0}
+  greetingFormat: "\xA1Hola, {0}!"
+  fallbackGreeting: "\xA1Hola de nuevo!"
+  forbiddenNames: {fileID: 11400000, guid: 8c0cd8d58dbe5f243b18f4d2114e42cc, type: 2}
 --- !u!1 &979032088
 GameObject:
   m_ObjectHideFlags: 0
@@ -3191,7 +3222,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 0f24a99a23917e84b9a9c0d2163352ed, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6f8d2c14acf5aa944a7062d4f045c4cb, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -3211,7 +3242,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -960, y: -539.67, z: 0}
-  m_LocalScale: {x: 0.6, y: 0.6, z: 1}
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1118360439}
@@ -4089,7 +4120,12 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Las Instrucciones
+  m_text: "Usa las teclas WASD para moverte por el mundo.\nAc\xE9rcate a un personaje
+    y presiona E para iniciar una conversaci\xF3n. \nAc\xE9rcate a un objeto brillante
+    en el mundo y haz clic derecho para recogerlo. \nPuedes seleccionar un espacio
+    de tu inventario con las teclas 1 al 9 \nSelecciona un espacio del inventario
+    que tenga un objeto, ac\xE9rcate a una celda del mundo y haz clic izquierdo para
+    colocarlo. \nTu progreso se guarda autom\xE1ticamente. "
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4116,11 +4152,11 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26.2
+  m_fontSize: 8.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 18
+  m_fontSizeMin: 8
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
@@ -4307,6 +4343,7 @@ GameObject:
   - component: {fileID: 1706688138}
   - component: {fileID: 1706688137}
   - component: {fileID: 1706688136}
+  - component: {fileID: 1706688139}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4388,6 +4425,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1706688139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1706688135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1 &1732951381
 GameObject:
   m_ObjectHideFlags: 0
@@ -4988,7 +5069,6 @@ GameObject:
   - component: {fileID: 1917129356}
   - component: {fileID: 1917129355}
   - component: {fileID: 1917129357}
-  - component: {fileID: 1917129358}
   m_Layer: 0
   m_Name: GamePersistence
   m_TagString: Untagged
@@ -5104,25 +5184,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CursorSystem
   database: {fileID: 11400000, guid: d4edb439b8a478a44a47ff8db7be11d9, type: 2}
   raycastDistance: 100
---- !u!114 &1917129358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1917129348}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b84acd845160d94ea56c8346a6219e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerNameUI
-  nameInputField: {fileID: 455471450}
-  confirmButton: {fileID: 398310074}
-  greetingText: {fileID: 427873252}
-  feedbackText: {fileID: 0}
-  greetingFormat: "\xA1Hola, {0}!"
-  fallbackGreeting: "\xA1Hola de nuevo!"
-  forbiddenNames: {fileID: 11400000, guid: 8c0cd8d58dbe5f243b18f4d2114e42cc, type: 2}
 --- !u!1 &2098747190
 GameObject:
   m_ObjectHideFlags: 0
