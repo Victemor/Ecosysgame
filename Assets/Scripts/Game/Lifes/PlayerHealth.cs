@@ -3,7 +3,8 @@ using UnityEngine;
 
 /// <summary>
 /// Maneja el valor de vida del jugador y notifica cambios a la UI.
-/// Si se cura estando al máximo de vida, otorga 25 monedas por fragmento.
+/// Se restaura automáticamente desde el save en Start().
+/// Si tenía 25 monedas por curación extra al estar al máximo.
 /// </summary>
 public class PlayerHealth : MonoBehaviour
 {
@@ -27,9 +28,28 @@ public class PlayerHealth : MonoBehaviour
     /// <summary>Se dispara cuando la vida llega a 0.</summary>
     public event Action OnMuerte;
 
+    // ── Unity lifecycle ──────────────────────────────────────────────
+
     private void Awake()
     {
+        // Inicializar al máximo como valor seguro mientras carga el save.
+        // Start() lo corregirá si hay un valor guardado diferente.
         VidaActual = vidaMax;
+    }
+
+    private void Start()
+    {
+        // Restaurar desde el save en Start() en lugar de depender de
+        // una coroutine externa. Start() siempre corre después de todos
+        // los Awake(), garantizando que ProgressManager ya existe y cargó.
+        if (ProgressManager.Instance != null && ProgressManager.Instance.Progress.vidaActual >= 0)
+        {
+            VidaActual = Mathf.Clamp(
+                ProgressManager.Instance.Progress.vidaActual, 0, vidaMax);
+        }
+
+        // Notificar siempre al arrancar para que la UI muestre el valor correcto.
+        OnVidaChanged?.Invoke(VidaActual);
     }
 
     // ── API pública ──────────────────────────────────────────────────
@@ -56,9 +76,7 @@ public class PlayerHealth : MonoBehaviour
     {
         if (cantidad <= 0) return;
 
-        bool estabaLleno = VidaActual >= vidaMax;
-
-        if (estabaLleno)
+        if (VidaActual >= vidaMax)
         {
             CurrencyManager.Instance?.Add(monedasPorCuracionExtra);
             return;
@@ -69,7 +87,8 @@ public class PlayerHealth : MonoBehaviour
     }
 
     /// <summary>
-    /// Establece la vida directamente. Útil para testing y guardado.
+    /// Establece la vida directamente. Usado por el sistema de guardado
+    /// y por herramientas de debug.
     /// </summary>
     public void SetVida(int valor)
     {

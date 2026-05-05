@@ -65,9 +65,6 @@ public class ProgressManager : MonoBehaviour
     {
         if (instance != null && instance != this)
         {
-            // Marcamos como duplicado en lugar de destruir.
-            // Así los botones del menú que apuntan a este componente
-            // siguen siendo válidos y redirigen al singleton real.
             isDuplicate = true;
             return;
         }
@@ -147,9 +144,6 @@ public class ProgressManager : MonoBehaviour
 
     // ── Sincronización ───────────────────────────────────────────────
 
-    /// <summary>
-    /// Al entrar en gameplay: restaura ecopuntos, vida y estado del mundo.
-    /// </summary>
     private void SyncToGameplay()
     {
         CurrencyManager currency = CurrencyManager.Instance;
@@ -160,9 +154,6 @@ public class ProgressManager : MonoBehaviour
         StartCoroutine(LoadWorldDelayed());
     }
 
-    /// <summary>
-    /// Al salir de gameplay: guarda ecopuntos, vida y estado del mundo.
-    /// </summary>
     private void SyncFromGameplay()
     {
         CurrencyManager currency = CurrencyManager.Instance;
@@ -177,9 +168,6 @@ public class ProgressManager : MonoBehaviour
         OnProgressChanged?.Invoke();
     }
 
-    /// <summary>
-    /// Espera un frame para que PlayerHealth exista en escena antes de restaurar.
-    /// </summary>
     private IEnumerator RestoreHealthDelayed()
     {
         yield return null;
@@ -189,10 +177,6 @@ public class ProgressManager : MonoBehaviour
             health.SetVida(Progress.vidaActual);
     }
 
-    /// <summary>
-    /// Espera un frame para que todos los GameObjects estén inicializados
-    /// antes de restaurar el estado del mundo.
-    /// </summary>
     private IEnumerator LoadWorldDelayed()
     {
         yield return null;
@@ -204,7 +188,6 @@ public class ProgressManager : MonoBehaviour
     /// <summary>
     /// Guarda el estado completo del mundo: inventario, celdas ocupadas
     /// y coleccionables ya recogidos.
-    /// Se llama automáticamente al salir de Gameplay y tras cada acción relevante.
     /// </summary>
     public void SaveWorldState()
     {
@@ -225,7 +208,6 @@ public class ProgressManager : MonoBehaviour
         foreach (WorldCell cell in cells)
         {
             if (!cell.IsOccupied) continue;
-
             data.occupiedCells.Add(new WorldCellSaveEntry
             {
                 cellId = cell.PersistId,
@@ -245,10 +227,6 @@ public class ProgressManager : MonoBehaviour
         SaveSystem.Save(data);
     }
 
-    /// <summary>
-    /// Carga y aplica el estado guardado del mundo:
-    /// inventario, celdas y coleccionables.
-    /// </summary>
     private void LoadWorldSave()
     {
         if (itemDatabase == null)
@@ -269,7 +247,6 @@ public class ProgressManager : MonoBehaviour
             foreach (WorldCellSaveEntry entry in data.occupiedCells)
             {
                 if (entry.cellId != cell.PersistId) continue;
-
                 ItemData item = itemDatabase.GetById(entry.itemId);
                 cell.RestoreFromSave(item);
                 break;
@@ -305,10 +282,6 @@ public class ProgressManager : MonoBehaviour
         Save();
     }
 
-    /// <summary>
-    /// Guarda el nombre del jugador y persiste inmediatamente.
-    /// Solo acepta nombres que ya pasaron por PlayerNameValidator.
-    /// </summary>
     public void SetPlayerName(string validatedName)
     {
         if (isDuplicate) { instance.SetPlayerName(validatedName); return; }
@@ -316,6 +289,31 @@ public class ProgressManager : MonoBehaviour
         Progress.playerName = validatedName;
         Save();
         OnProgressChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Actualiza y guarda la vida actual inmediatamente a disco.
+    /// Llamado por GameProgressAutoSaver al recibir OnVidaChanged.
+    /// Garantiza que una vida perdida persiste aunque el juego se cierre en ese frame.
+    /// </summary>
+    public void SaveVidaActual(int vida)
+    {
+        if (isDuplicate) { instance.SaveVidaActual(vida); return; }
+
+        Progress.vidaActual = vida;
+        Save();
+    }
+
+    /// <summary>
+    /// Actualiza y guarda los ecopuntos inmediatamente a disco.
+    /// Llamado por GameProgressAutoSaver al recibir OnCurrencyChanged.
+    /// </summary>
+    public void SaveEcopuntosActual(int cantidad)
+    {
+        if (isDuplicate) { instance.SaveEcopuntosActual(cantidad); return; }
+
+        Progress.ecopuntos = cantidad;
+        Save();
     }
 
     /// <summary>
