@@ -8,15 +8,15 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - NPC
   - Water
   - UI
   - Player
   - Interactable
   - Ground
-  - 
-  - 
-  - 
+  - Obstacles
+  - WorldCell
+  - CollectibleItem
   - 
   - 
   - 

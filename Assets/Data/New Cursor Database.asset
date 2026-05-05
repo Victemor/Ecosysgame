@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e30613d56803ba84a86fd0186026798e, type: 3}
+  m_Name: New Cursor Database
+  m_EditorClassIdentifier: Assembly-CSharp::CursorDatabase
+  defaultCursor: {fileID: 2800000, guid: fc3b6675168a762449afbc52b4799b3e, type: 3}
+  entries:
+  - targetLayer:
+      serializedVersion: 2
+      m_Bits: 128
+    cursorTexture: {fileID: 2800000, guid: 6128aa5f77f0e0046abbf23cd5432f7c, type: 3}
+    priority: 0
+  - targetLayer:
+      serializedVersion: 2
+      m_Bits: 2048
+    cursorTexture: {fileID: 2800000, guid: d886b5736c21c614ca7f7fef2ad279b6, type: 3}
+    priority: 1
+  - targetLayer:
+      serializedVersion: 2
+      m_Bits: 1024
+    cursorTexture: {fileID: 2800000, guid: f42cc8afdd1f9ef4abff6065cfe65daa, type: 3}
+    priority: 0
+  - targetLayer:
+      serializedVersion: 2
+      m_Bits: 1024
+    cursorTexture: {fileID: 2800000, guid: f42cc8afdd1f9ef4abff6065cfe65daa, type: 3}
+    priority: 0

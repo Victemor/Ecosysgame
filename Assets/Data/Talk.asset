@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 598010848ae8fc343b817bd963e86c56, type: 3}
   m_Name: Talk
   m_EditorClassIdentifier: Assembly-CSharp::InteractableData
-  id: rana
-  displayName: rana
-  description: ranatalk
+  id: GuguaLoba
+  displayName: Gugua Loba
+  description: GuguaLoba Talk
   icon: {fileID: 21300000, guid: 308b4fecc8fcc094cab570305e57af20, type: 3}
   interactionType: 2
   triggersDialogue: 1

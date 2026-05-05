@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Controla el movimiento autónomo del NPC con Rigidbody.
-/// La gravedad la gestiona Unity; el script solo mueve horizontalmente
-/// mediante velocity para no interferir con la física vertical.
+/// Controla el movimiento autónomo del NPC con Rigidbody puro.
+/// Usa linearVelocity para respetar la gravedad y las colisiones.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class NPCMovement : MonoBehaviour
@@ -32,20 +31,21 @@ public class NPCMovement : MonoBehaviour
     private float decisionInterval = 3f;
 
     [SerializeField, Tooltip("Probabilidad de moverse en cada ciclo (0 = nunca, 1 = siempre).")]
+    [Range(0f, 1f)]
     private float moveProbability = 0.6f;
 
     private Rigidbody rb;
     private bool isMoving;
 
-    /// <summary>
-    /// Dirección 2D de movimiento actual. Leída por NPCSpriteAnimator.
-    /// </summary>
     public Vector2 MovementDirection { get; private set; }
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
 
+        // Kinematic = false para que la gravedad funcione
+        rb.isKinematic            = false;
+        rb.useGravity             = true;
         rb.freezeRotation         = true;
         rb.interpolation          = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
@@ -82,13 +82,13 @@ public class NPCMovement : MonoBehaviour
         isMoving          = false;
         MovementDirection = Vector2.zero;
 
-        // Detener movimiento horizontal al terminar
+        // Detener movimiento horizontal, preservar Y (gravedad)
         rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
     }
 
     /// <summary>
-    /// Mueve el NPC hacia el destino frame a frame comparando solo distancia horizontal.
-    /// La velocidad Y del Rigidbody no se toca para respetar la gravedad de Unity.
+    /// Mueve el NPC hacia el destino usando velocity horizontal.
+    /// La Y del Rigidbody no se toca para que la gravedad funcione.
     /// </summary>
     private IEnumerator MoveTo(Transform target)
     {
@@ -98,13 +98,20 @@ public class NPCMovement : MonoBehaviour
             Vector3 targetFlat = new Vector3(target.position.x,    0f, target.position.z);
 
             if (Vector3.Distance(selfFlat, targetFlat) <= stoppingDistance)
+            {
+                rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
                 break;
+            }
 
             Vector3 direction = (targetFlat - selfFlat).normalized;
             MovementDirection = new Vector2(direction.x, direction.z);
 
-            Vector3 newPosition = rb.position + direction * moveSpeed * Time.fixedDeltaTime;
-            rb.MovePosition(newPosition);
+            // Solo velocidad horizontal — Y la gestiona el Rigidbody
+            rb.linearVelocity = new Vector3(
+                direction.x * moveSpeed,
+                rb.linearVelocity.y,
+                direction.z * moveSpeed
+            );
 
             yield return new WaitForFixedUpdate();
         }

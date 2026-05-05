@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 3311108609005231059}
   - component: {fileID: 8358546396443516277}
   - component: {fileID: 1663659208957525534}
-  - component: {fileID: 5240843711315414353}
   - component: {fileID: 6930740933923952761}
   - component: {fileID: 5976749241725996897}
   m_Layer: 6
@@ -31,13 +30,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 947056055181794885}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 60, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5760971065935980388
 SpriteRenderer:
   serializedVersion: 2
@@ -116,8 +115,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.34234408, y: 0.32077694, z: 0.07722968}
-  m_Center: {x: -0.047049284, y: 0.1603887, z: 0.0613843}
+  m_Size: {x: 0.24494804, y: 0.32077694, z: 0.15950723}
+  m_Center: {x: -0.000054620206, y: 0.16038871, z: 0.020245284}
 --- !u!114 &8358546396443516277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,31 +165,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 1
   cameraTransform: {fileID: 0}
---- !u!143 &5240843711315414353
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 947056055181794885}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 0.3
-  m_Radius: 0.3
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6930740933923952761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -232,5 +206,5 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
