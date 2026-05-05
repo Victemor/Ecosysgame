@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9889e242e1bea742b06271dc12350a6, type: 3}
   m_Name: New Forbidden Names List
   m_EditorClassIdentifier: Assembly-CSharp::ForbiddenNamesList
-  forbiddenNames: []
+  forbiddenNames:
+  - Pollo

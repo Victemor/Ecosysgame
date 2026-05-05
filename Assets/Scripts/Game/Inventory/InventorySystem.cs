@@ -62,12 +62,14 @@ public class InventorySystem : MonoBehaviour
     {
         if (instance != null && instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this);
             return;
         }
 
         instance = this;
-        DontDestroyOnLoad(gameObject);
+        // Sin DontDestroyOnLoad aquí — InventorySystem vive como hijo de
+        // GamePersistence que ya es DDOL. El padre lo persiste automáticamente.
+        // Llamar DontDestroyOnLoad en un hijo lanza un error de Unity.
     }
 
     // ── API pública ──────────────────────────────────────────────────

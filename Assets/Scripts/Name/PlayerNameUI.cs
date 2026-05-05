@@ -5,9 +5,7 @@ using UnityEngine.UI;
 /// <summary>
 /// Controla la UI de nombre del jugador en el menú principal.
 /// Gestiona el InputField, el botón de confirmación y el texto de saludo.
-///
-/// Robusto ante recargas de escena: se re-suscribe a los datos en OnEnable
-/// y refresca la UI en cada visita al menú sin depender de estado previo.
+/// Se suscribe a OnProgressChanged para reflejar resets automáticamente.
 /// </summary>
 public class PlayerNameUI : MonoBehaviour
 {
@@ -22,21 +20,18 @@ public class PlayerNameUI : MonoBehaviour
     [SerializeField, Tooltip("Texto que muestra el saludo con el nombre del jugador.")]
     private TextMeshProUGUI greetingText;
 
-    [SerializeField, Tooltip("Texto pequeño que muestra feedback de validación " +
-                             "(error o confirmación). Puede ser null si no se usa.")]
+    [SerializeField, Tooltip("Texto pequeño de feedback. Puede ser null.")]
     private TextMeshProUGUI feedbackText;
 
     [Header("Configuración")]
 
-    [SerializeField, Tooltip("Mensaje de saludo cuando el jugador tiene nombre. " +
-                             "Usa {0} como placeholder para el nombre. Ej: '¡Hola, {0}!'")]
+    [SerializeField, Tooltip("Formato del saludo. Usa {0} como placeholder para el nombre.")]
     private string greetingFormat = "¡Hola, {0}!";
 
-    [SerializeField, Tooltip("Mensaje de saludo cuando no hay nombre guardado.")]
+    [SerializeField, Tooltip("Saludo cuando no hay nombre guardado.")]
     private string fallbackGreeting = "¡Hola de nuevo!";
 
-    [SerializeField, Tooltip("Lista de nombres prohibidos. " +
-                             "Puede ser null — la validación igual funciona sin ella.")]
+    [SerializeField, Tooltip("Lista de nombres prohibidos. Puede ser null.")]
     private ForbiddenNamesList forbiddenNames;
 
     // ── Unity lifecycle ──────────────────────────────────────────────
@@ -51,11 +46,20 @@ public class PlayerNameUI : MonoBehaviour
 
     private void OnEnable()
     {
-        // Se llama cada vez que el menú se activa (incluyendo vueltas desde gameplay).
-        // Refrescar aquí garantiza que el saludo siempre refleje el nombre actual.
+        // Suscribirse a OnProgressChanged para detectar resets y otros
+        // cambios externos que afecten el nombre sin pasar por esta UI.
+        if (ProgressManager.Instance != null)
+            ProgressManager.Instance.OnProgressChanged += HandleProgressChanged;
+
         RefreshGreeting();
         ClearInputField();
         ClearFeedback();
+    }
+
+    private void OnDisable()
+    {
+        if (ProgressManager.Instance != null)
+            ProgressManager.Instance.OnProgressChanged -= HandleProgressChanged;
     }
 
     private void OnDestroy()
@@ -89,12 +93,18 @@ public class PlayerNameUI : MonoBehaviour
         ShowFeedback("¡Nombre guardado!", isError: false);
     }
 
+    /// <summary>
+    /// Reacciona a cualquier cambio de progreso externo (reset, carga, etc).
+    /// Refresca el saludo para que siempre refleje el estado real del save.
+    /// </summary>
+    private void HandleProgressChanged()
+    {
+        RefreshGreeting();
+        ClearFeedback();
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Actualiza el texto de saludo con el nombre guardado.
-    /// Si no hay nombre, muestra el fallback.
-    /// </summary>
     private void RefreshGreeting()
     {
         if (greetingText == null || ProgressManager.Instance == null) return;

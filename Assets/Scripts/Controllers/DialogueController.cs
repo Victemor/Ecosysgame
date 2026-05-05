@@ -14,22 +14,17 @@ public class DialogueController : MonoBehaviour
     private static DialogueController instance;
 
     /// <summary>
-    /// Acceso global seguro. Se auto-crea si no existe en escena.
+    /// Acceso global al controlador de diálogo.
+    /// No auto-crea el objeto — si no existe en escena retorna null.
+    /// Auto-crear en un getter provoca instanciación durante el cierre
+    /// de escena, generando la advertencia de GameObjects no limpiados.
     /// </summary>
     public static DialogueController Instance
     {
         get
         {
             if (instance == null)
-            {
-                instance = FindObjectOfType<DialogueController>();
-
-                if (instance == null)
-                {
-                    GameObject obj = new GameObject("DialogueController");
-                    instance = obj.AddComponent<DialogueController>();
-                }
-            }
+                instance = FindFirstObjectByType<DialogueController>();
 
             return instance;
         }
@@ -38,7 +33,7 @@ public class DialogueController : MonoBehaviour
     // ── Eventos públicos ─────────────────────────────────────────────
 
     /// <summary>
-    /// Se dispara al iniciar un diálogo. Proporciona los metadatos del diálogo (speaker, id, etc.).
+    /// Se dispara al iniciar un diálogo. Proporciona los metadatos del diálogo.
     /// </summary>
     public event Action<DialogueData> OnDialogueStarted;
 
@@ -81,11 +76,21 @@ public class DialogueController : MonoBehaviour
     {
         if (instance != null && instance != this)
         {
-            Destroy(gameObject);
+            // Destroy(this) destruye solo el componente, no el GameObject completo.
+            // DialogueController no es DDOL — es específico de la escena de gameplay.
+            Destroy(this);
             return;
         }
 
         instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        // Limpiar la referencia estática al destruirse para que el getter
+        // no intente usar una instancia destruida en el siguiente frame.
+        if (instance == this)
+            instance = null;
     }
 
     // ── API pública ──────────────────────────────────────────────────
@@ -112,7 +117,6 @@ public class DialogueController : MonoBehaviour
         currentNode     = dialogueData.StartNode;
 
         OnDialogueStarted?.Invoke(currentDialogue);
-
         ProcessNode(currentNode);
     }
 
@@ -124,12 +128,12 @@ public class DialogueController : MonoBehaviour
     /// </summary>
     public void ContinueDialogue()
     {
-        if (currentNode == null)
-            return;
+        if (currentNode == null) return;
 
         if (currentNode.Choices != null && currentNode.Choices.Count > 0)
         {
-            Debug.LogWarning("[DialogueController] El nodo actual tiene opciones. Usa SelectChoice() en lugar de ContinueDialogue().");
+            Debug.LogWarning("[DialogueController] El nodo actual tiene opciones. " +
+                             "Usa SelectChoice() en lugar de ContinueDialogue().");
             return;
         }
 
@@ -139,7 +143,8 @@ public class DialogueController : MonoBehaviour
 
             if (nextNode == null)
             {
-                Debug.LogWarning($"[DialogueController] No se encontró el nodo con ID '{currentNode.NextNodeId}'. Se termina el diálogo.");
+                Debug.LogWarning($"[DialogueController] Nodo '{currentNode.NextNodeId}' no encontrado. " +
+                                 "Se termina el diálogo.");
                 EndDialogue();
                 return;
             }
@@ -182,7 +187,7 @@ public class DialogueController : MonoBehaviour
 
         if (nextNode == null)
         {
-            Debug.LogWarning($"[DialogueController] No se encontró el nodo destino '{nextId}' de la opción {choiceIndex}.");
+            Debug.LogWarning($"[DialogueController] Nodo destino '{nextId}' de la opción {choiceIndex} no encontrado.");
             EndDialogue();
             return;
         }
@@ -191,12 +196,12 @@ public class DialogueController : MonoBehaviour
     }
 
     /// <summary>
-    /// Fuerza el cierre del diálogo desde un sistema externo (ej. muerte del jugador, cutscene).
+    /// Fuerza el cierre del diálogo desde un sistema externo
+    /// (ej. muerte del jugador, cutscene, reset de progreso).
     /// </summary>
     public void ForceEndDialogue()
     {
-        if (!IsDialogueActive)
-            return;
+        if (!IsDialogueActive) return;
 
         EndDialogue();
     }
@@ -204,8 +209,8 @@ public class DialogueController : MonoBehaviour
     // ── Lógica interna ───────────────────────────────────────────────
 
     /// <summary>
-    /// Evalúa un nodo: dispara su evento embebido si tiene uno, notifica el cambio
-    /// y expone las opciones si las hay.
+    /// Evalúa un nodo: dispara su evento embebido si tiene uno,
+    /// notifica el cambio y expone las opciones si las hay.
     /// </summary>
     private void ProcessNode(DialogueNode node)
     {
@@ -217,13 +222,11 @@ public class DialogueController : MonoBehaviour
 
         currentNode = node;
 
-        // Disparar evento embebido antes de mostrar el texto
         if (node.DialogueEvent != null && node.DialogueEvent.EventType != DialogueEventType.None)
             OnDialogueEventTriggered?.Invoke(node.DialogueEvent);
 
         OnNodeChanged?.Invoke(currentNode);
 
-        // Si el nodo tiene opciones, notificarlas a la UI
         if (currentNode.Choices != null && currentNode.Choices.Count > 0)
             OnChoicesAvailable?.Invoke(currentNode.Choices.ToArray());
     }
@@ -246,13 +249,13 @@ public class DialogueController : MonoBehaviour
     /// </summary>
     private DialogueNode FindNodeById(string id)
     {
-        if (currentDialogue == null)
-            return null;
+        if (currentDialogue == null) return null;
 
         DialogueNode node = currentDialogue.Nodes.FirstOrDefault(n => n.NodeId == id);
 
         if (node == null)
-            Debug.LogError($"[DialogueController] Nodo '{id}' no encontrado en '{currentDialogue.Id}'. Verifica el DialogueData asset.");
+            Debug.LogError($"[DialogueController] Nodo '{id}' no encontrado en '{currentDialogue.Id}'. " +
+                           "Verifica el DialogueData asset.");
 
         return node;
     }
@@ -272,7 +275,6 @@ public class DialogueController : MonoBehaviour
             return;
         }
 
-        // Crear nodos y encadenarlos por ID
         DialogueNode[] nodes = new DialogueNode[lines.Length];
 
         for (int i = 0; i < lines.Length; i++)
@@ -281,12 +283,11 @@ public class DialogueController : MonoBehaviour
 
             string nextId = i < lines.Length - 1 ? $"test_{i + 1}" : string.Empty;
 
-            SetField(nodes[i], "nodeId",    $"test_{i}");
-            SetField(nodes[i], "text",      lines[i]);
+            SetField(nodes[i], "nodeId",     $"test_{i}");
+            SetField(nodes[i], "text",       lines[i]);
             SetField(nodes[i], "nextNodeId", nextId);
         }
 
-        // Crear el DialogueData en memoria
         DialogueData data = ScriptableObject.CreateInstance<DialogueData>();
 
         SetField(data, "id",          "test_dialogue");
@@ -299,8 +300,7 @@ public class DialogueController : MonoBehaviour
 
     /// <summary>
     /// Asigna un campo privado por reflexión.
-    /// Centralizado aquí para mantener StartTestDialogue legible.
-    /// Solo se usa en contexto de testing; reflexión es aceptable en este scope.
+    /// Solo se usa en contexto de testing — reflexión es aceptable en este scope.
     /// </summary>
     private static void SetField(object target, string fieldName, object value)
     {
