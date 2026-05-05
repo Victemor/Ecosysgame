@@ -95,7 +95,7 @@ public class WorldCell : MonoBehaviour
 
     /// <summary>
     /// Coloca el ítem: reemplaza el sprite, retira el ítem del inventario,
-    /// bloquea la celda y guarda inmediatamente el estado del mundo.
+    /// deselecciona el slot activo, bloquea la celda y guarda el estado.
     /// </summary>
     private void PlaceItem(ItemData item, int slotIndex)
     {
@@ -104,6 +104,7 @@ public class WorldCell : MonoBehaviour
         placedItemId          = item.Id;
 
         InventorySystem.Instance.RemoveItemAt(slotIndex);
+        InventorySystem.Instance.ClearSelection();
 
         ProgressManager.Instance.SaveWorldState();
 

@@ -111,6 +111,19 @@ public class InventorySystem : MonoBehaviour
             OnSelectionChanged?.Invoke(previous, SelectedIndex);
     }
 
+    /// <summary>
+    /// Deselecciona el slot activo sin seleccionar ninguno nuevo.
+    /// Llamado automáticamente tras colocar un ítem en un WorldCell.
+    /// </summary>
+    public void ClearSelection()
+    {
+        if (SelectedIndex == -1) return;
+
+        int previous  = SelectedIndex;
+        SelectedIndex = -1;
+        OnSelectionChanged?.Invoke(previous, -1);
+    }
+
     /// <summary>Retorna el ítem en el slot indicado, o null si está vacío.</summary>
     public ItemData GetItem(int index)
     {
@@ -148,7 +161,7 @@ public class InventorySystem : MonoBehaviour
 
     /// <summary>
     /// Restaura el inventario desde una lista de IDs.
-    /// Requiere un ItemDatabase para resolver IDs → ItemData.
+    /// Requiere un ItemDatabase para resolver IDs a ItemData.
     /// </summary>
     public void LoadFromSaveData(List<string> savedSlots, ItemDatabase database)
     {

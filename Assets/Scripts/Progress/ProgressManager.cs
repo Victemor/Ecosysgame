@@ -6,9 +6,14 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Sistema central de progreso y persistencia.
-/// Guarda: tiempo jugado, ecopuntos, progreso total, vida actual,
+/// Guarda: tiempo jugado, ecopuntos, progreso total, vida actual, nombre del jugador,
 /// estado del inventario, WorldCells ocupadas y CollectibleItems recogidos.
-/// Autosave periódico + guardado en cambio de escena y al salir.
+///
+/// PATRÓN isDuplicate:
+/// Cuando el MainMenu se recarga, Unity crea un nuevo ProgressManager que
+/// Awake detecta como duplicado. En lugar de destruirlo (lo que dejaría
+/// los botones del menú apuntando a null), se marca como duplicado y
+/// todas sus llamadas públicas se redirigen al singleton real.
 /// </summary>
 public class ProgressManager : MonoBehaviour
 {
@@ -50,8 +55,9 @@ public class ProgressManager : MonoBehaviour
     public GameProgress Progress { get; private set; } = new GameProgress();
     public event Action OnProgressChanged;
 
-    private string SavePath    => Path.Combine(Application.persistentDataPath, saveFileName);
+    private string SavePath       => Path.Combine(Application.persistentDataPath, saveFileName);
     private bool   isTrackingTime;
+    private bool   isDuplicate;
 
     // ── Unity lifecycle ──────────────────────────────────────────────
 
@@ -59,7 +65,10 @@ public class ProgressManager : MonoBehaviour
     {
         if (instance != null && instance != this)
         {
-            Destroy(this);
+            // Marcamos como duplicado en lugar de destruir.
+            // Así los botones del menú que apuntan a este componente
+            // siguen siendo válidos y redirigen al singleton real.
+            isDuplicate = true;
             return;
         }
 
@@ -70,24 +79,29 @@ public class ProgressManager : MonoBehaviour
 
     private void OnEnable()
     {
+        if (isDuplicate) return;
+
         SceneManager.sceneLoaded   += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
     private void OnDisable()
     {
+        if (isDuplicate) return;
+
         SceneManager.sceneLoaded   -= OnSceneLoaded;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
     }
 
     private void Update()
     {
-        if (!isTrackingTime) return;
+        if (isDuplicate || !isTrackingTime) return;
         Progress.tiempoJugadoSegundos += Time.deltaTime;
     }
 
     private void OnApplicationQuit()
     {
+        if (isDuplicate) return;
         SyncFromGameplay();
         Save();
     }
@@ -176,8 +190,8 @@ public class ProgressManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Espera un frame para que todos los GameObjects de la escena estén inicializados
-    /// antes de intentar restaurar el estado del mundo.
+    /// Espera un frame para que todos los GameObjects estén inicializados
+    /// antes de restaurar el estado del mundo.
     /// </summary>
     private IEnumerator LoadWorldDelayed()
     {
@@ -194,6 +208,8 @@ public class ProgressManager : MonoBehaviour
     /// </summary>
     public void SaveWorldState()
     {
+        if (isDuplicate) { instance.SaveWorldState(); return; }
+
         if (itemDatabase == null)
         {
             Debug.LogWarning("[ProgressManager] ItemDatabase no asignado — no se puede guardar el mundo.");
@@ -202,13 +218,10 @@ public class ProgressManager : MonoBehaviour
 
         GameSaveData data = new GameSaveData();
 
-        // ── Inventario ────────────────────────────────────────────
         if (InventorySystem.Instance != null)
             data.inventorySlots = InventorySystem.Instance.ExportSaveData();
 
-        // ── WorldCells ocupadas ───────────────────────────────────
         WorldCell[] cells = FindObjectsByType<WorldCell>(FindObjectsSortMode.None);
-
         foreach (WorldCell cell in cells)
         {
             if (!cell.IsOccupied) continue;
@@ -220,7 +233,6 @@ public class ProgressManager : MonoBehaviour
             });
         }
 
-        // ── CollectibleItems recogidos ────────────────────────────
         CollectibleItem[] collectibles = FindObjectsByType<CollectibleItem>(
             FindObjectsInactive.Include, FindObjectsSortMode.None);
 
@@ -248,13 +260,10 @@ public class ProgressManager : MonoBehaviour
         GameSaveData data = SaveSystem.Load();
         if (data == null) return;
 
-        // ── Inventario ────────────────────────────────────────────
         if (InventorySystem.Instance != null)
             InventorySystem.Instance.LoadFromSaveData(data.inventorySlots, itemDatabase);
 
-        // ── WorldCells ────────────────────────────────────────────
         WorldCell[] cells = FindObjectsByType<WorldCell>(FindObjectsSortMode.None);
-
         foreach (WorldCell cell in cells)
         {
             foreach (WorldCellSaveEntry entry in data.occupiedCells)
@@ -267,7 +276,6 @@ public class ProgressManager : MonoBehaviour
             }
         }
 
-        // ── CollectibleItems ──────────────────────────────────────
         CollectibleItem[] collectibles = FindObjectsByType<CollectibleItem>(
             FindObjectsInactive.Include, FindObjectsSortMode.None);
 
@@ -278,26 +286,47 @@ public class ProgressManager : MonoBehaviour
         }
     }
 
-    // ── Progress API pública ─────────────────────────────────────────
+    // ── API pública ──────────────────────────────────────────────────
 
     public void AddEcopuntos(int cantidad)
     {
+        if (isDuplicate) { instance.AddEcopuntos(cantidad); return; }
+
         Progress.ecopuntos = Mathf.Max(0, Progress.ecopuntos + cantidad);
         OnProgressChanged?.Invoke();
     }
 
     public void SetProgresoTotal(float valor)
     {
+        if (isDuplicate) { instance.SetProgresoTotal(valor); return; }
+
         Progress.progresoTotal = Mathf.Clamp(valor, 0f, 100f);
         OnProgressChanged?.Invoke();
         Save();
     }
 
     /// <summary>
-    /// Reinicia todo el progreso a cero: stats, inventario y estado del mundo.
+    /// Guarda el nombre del jugador y persiste inmediatamente.
+    /// Solo acepta nombres que ya pasaron por PlayerNameValidator.
+    /// </summary>
+    public void SetPlayerName(string validatedName)
+    {
+        if (isDuplicate) { instance.SetPlayerName(validatedName); return; }
+
+        Progress.playerName = validatedName;
+        Save();
+        OnProgressChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Reinicia todo el progreso: stats, nombre, inventario y estado del mundo.
+    /// Si se llama desde gameplay, recarga la escena para resetear
+    /// visualmente los objetos del mundo.
     /// </summary>
     public void ResetProgress()
     {
+        if (isDuplicate) { instance.ResetProgress(); return; }
+
         Progress = new GameProgress();
         Save();
         SaveSystem.DeleteSave();
@@ -309,11 +338,16 @@ public class ProgressManager : MonoBehaviour
             currency.ForceNotify();
         }
 
-        PlayerHealth health = FindFirstObjectByType<PlayerHealth>();
-        if (health != null)
-            health.SetVida(health.VidaMax);
-
-        OnProgressChanged?.Invoke();
+        if (SceneManager.GetActiveScene().name == gameplaySceneName)
+        {
+            isTrackingTime = false;
+            StopAllCoroutines();
+            SceneManager.LoadScene(gameplaySceneName);
+        }
+        else
+        {
+            OnProgressChanged?.Invoke();
+        }
 
         Debug.Log("[ProgressManager] Progreso reiniciado.");
     }
@@ -322,6 +356,8 @@ public class ProgressManager : MonoBehaviour
 
     public void Save()
     {
+        if (isDuplicate) { instance.Save(); return; }
+
         try
         {
             string json = JsonUtility.ToJson(Progress, prettyPrint: true);
@@ -329,12 +365,14 @@ public class ProgressManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"[ProgressManager] Error al guardar progreso: {e.Message}");
+            Debug.LogError($"[ProgressManager] Error al guardar: {e.Message}");
         }
     }
 
     public void Load()
     {
+        if (isDuplicate) { instance.Load(); return; }
+
         try
         {
             if (File.Exists(SavePath))
@@ -353,13 +391,15 @@ public class ProgressManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"[ProgressManager] Error al cargar progreso: {e.Message}");
+            Debug.LogError($"[ProgressManager] Error al cargar: {e.Message}");
             Progress = new GameProgress();
         }
     }
 
     public string GetFormattedTime()
     {
+        if (isDuplicate) return instance.GetFormattedTime();
+
         float total   = Progress.tiempoJugadoSegundos;
         int   hours   = (int)(total / 3600);
         int   minutes = (int)(total % 3600 / 60);

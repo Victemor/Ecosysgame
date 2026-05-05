@@ -21,4 +21,10 @@ public class GameProgress
     /// -1 significa que no hay dato guardado (usa el máximo por defecto).
     /// </summary>
     public int vidaActual = -1;
+
+    /// <summary>
+    /// Nombre del jugador ingresado en el menú.
+    /// Vacío si nunca se ha asignado un nombre.
+    /// </summary>
+    public string playerName = string.Empty;
 }

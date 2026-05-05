@@ -3689,6 +3689,7 @@ GameObject:
   - component: {fileID: 1917129353}
   - component: {fileID: 1917129356}
   - component: {fileID: 1917129355}
+  - component: {fileID: 1917129357}
   m_Layer: 0
   m_Name: GamePersistence
   m_TagString: Untagged
@@ -3790,6 +3791,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2381829564d4e8d4d841544246043a55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+--- !u!114 &1917129357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1917129348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 870a6c3941b6ed3489c40baa41bd167e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CursorSystem
+  database: {fileID: 11400000, guid: d4edb439b8a478a44a47ff8db7be11d9, type: 2}
+  raycastDistance: 100
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
